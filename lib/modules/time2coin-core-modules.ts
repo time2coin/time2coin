@@ -48,3 +48,49 @@ export function checkMerchantTrustGate(
   }
   return { eligible: true };
 }
+
+// =================================================================------------
+// MODULE 2: LEDGER CORE & ESCROW STATE MACHINE
+// =================================================================------------
+
+export type TransactionStatus = 
+  | 'REQUESTED' | 'ESCROW_LOCKED' | 'SERVICE_DELIVERED' | 'VERIFIED_AND_PAID' | 'DISPUTED' | 'RATED';
+
+export interface Feature5Split {
+  grossMinutes: number;
+  netReceiverMinutes: number;
+  mutualAidMinutes: number;
+  maintainerMinutes: number;
+}
+
+export function calculateFeature5Split(grossMinutes: number): Feature5Split {
+  if (grossMinutes <= 0) throw new Error('Gross duration must be greater than zero.');
+  const netReceiverMinutes = Math.floor(grossMinutes * 0.95);
+  const totalReserve = grossMinutes - netReceiverMinutes;
+  const mutualAidMinutes = Number((totalReserve * 0.8).toFixed(2));
+  const maintainerMinutes = Number((totalReserve * 0.2).toFixed(2));
+
+  return { grossMinutes, netReceiverMinutes, mutualAidMinutes, maintainerMinutes };
+}
+
+// =================================================================------------
+// MODULE 5 & 6: MERCHANT CLEARINGHOUSE, B2B CSR & FRAUD SHIELD
+// =================================================================------------
+
+export function checkMerchantSettlementEligibility(
+  accumulatedTimeCoins: number,
+  minThresholdMinutes: number = 500
+): { eligible: boolean; minsShort: number } {
+  if (accumulatedTimeCoins >= minThresholdMinutes) return { eligible: true, minsShort: 0 };
+  return { eligible: false, minsShort: minThresholdMinutes - accumulatedTimeCoins };
+}
+
+export function evaluateTransactionForFraud(
+  recentRedemptionsInHour: number,
+  merchantAverageHourlyRate: number
+): { flagForAudit: boolean; reason?: string } {
+  if (recentRedemptionsInHour > merchantAverageHourlyRate * 5 && recentRedemptionsInHour > 30) {
+    return { flagForAudit: true, reason: 'Automated Fraud Trigger: Unusual redemption surge detected. Transaction placed on AUDIT_HOLD.' };
+  }
+  return { flagForAudit: false };
+}
