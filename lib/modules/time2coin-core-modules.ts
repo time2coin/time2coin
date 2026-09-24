@@ -74,6 +74,43 @@ export function calculateFeature5Split(grossMinutes: number): Feature5Split {
 }
 
 // =================================================================------------
+// MODULE 4: OFFLINE BLE MESH, ED25519 & GOSSIP PROTOCOL
+// =================================================================------------
+
+export interface OfflineTransactionReceipt {
+  id?: number;
+  nonce: string;
+  senderId: string;
+  receiverId: string;
+  grossMinutes: number;
+  timestamp: number;
+  serviceTitle: string;
+  senderSignature: string;
+  receiverSignature?: string;
+  synced: number; // 0 = false, 1 = true
+  replicatedPeersCount: number;
+}
+
+interface Time2CoinOfflineDB extends DBSchema {
+  transactions: {
+    key: number;
+    value: OfflineTransactionReceipt;
+    indexes: {
+      'by-synced': number;
+      'by-nonce': string;
+    };
+  };
+  keys: {
+    key: string;
+    value: { publicKey: string; privateKey: string };
+  };
+  gossip_cache: {
+    key: string;
+    value: { nonce: string; rawReceipt: OfflineTransactionReceipt; receivedAt: number };
+  };
+}
+
+// =================================================================------------
 // MODULE 5 & 6: MERCHANT CLEARINGHOUSE, B2B CSR & FRAUD SHIELD
 // =================================================================------------
 
