@@ -16,14 +16,27 @@ export interface OfflineTransactionReceipt {
   serviceTitle: string;
   senderSignature: string;
   receiverSignature?: string;
-  synced: boolean;
+  synced: number; // 0 = false, 1 = true (IndexedDB valid key type)
   replicatedPeersCount: number;
 }
 
 interface Time2CoinOfflineDB extends DBSchema {
-  transactions: { key: number; value: OfflineTransactionReceipt; indexes: { 'by-synced': boolean; 'by-nonce': string } };
-  keys: { key: string; value: { publicKey: string; privateKey: string } };
-  gossip_cache: { key: string; value: { nonce: string; rawReceipt: OfflineTransactionReceipt; receivedAt: number } };
+  transactions: {
+    key: number;
+    value: OfflineTransactionReceipt;
+    indexes: {
+      'by-synced': number;
+      'by-nonce': string;
+    };
+  };
+  keys: {
+    key: string;
+    value: { publicKey: string; privateKey: string };
+  };
+  gossip_cache: {
+    key: string;
+    value: { nonce: string; rawReceipt: OfflineTransactionReceipt; receivedAt: number };
+  };
 }
 
 export const TIME2COIN_BLE_SERVICE_UUID = 'e48a0001-8b21-4f1a-b892-9a0022334455';
@@ -40,8 +53,12 @@ export function getOfflineDB() {
           txStore.createIndex('by-synced', 'synced');
           txStore.createIndex('by-nonce', 'nonce', { unique: true });
         }
-        if (!db.objectStoreNames.contains('keys')) db.createObjectStore('keys');
-        if (!db.objectStoreNames.contains('gossip_cache')) db.createObjectStore('gossip_cache', { keyPath: 'nonce' });
+        if (!db.objectStoreNames.contains('keys')) {
+          db.createObjectStore('keys');
+        }
+        if (!db.objectStoreNames.contains('gossip_cache')) {
+          db.createObjectStore('gossip_cache', { keyPath: 'nonce' });
+        }
       },
     });
   }
