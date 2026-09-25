@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ShieldCheck, Sliders, Download, FileText, Database, Users, 
-  AlertTriangle, RefreshCw, CheckCircle2, Search, Lock, ArrowLeft, LogIn, LogOut, Check, X, Key
+  AlertTriangle, RefreshCw, CheckCircle2, Search, Lock, ArrowLeft, LogOut, Check, X, Key
 } from 'lucide-react';
 
 export default function AdminControlVault() {
@@ -13,9 +13,9 @@ export default function AdminControlVault() {
   const [vaultSplit, setVaultSplit] = useState<number>(1);
   const [currentUser, setCurrentUser] = useState<any>(null);
 
-  // Direct Admin Login Form inside /admin if unauthenticated
-  const [adminEmail, setAdminEmail] = useState('admin@time2coin.app');
-  const [adminPassword, setAdminPassword] = useState('SuperAdmin2026!');
+  // Direct Admin Credentials
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
   const [loginError, setLoginError] = useState('');
 
   // Pending Applicant Queue State
@@ -56,7 +56,7 @@ export default function AdminControlVault() {
       localStorage.setItem('time2coin_user', JSON.stringify(adminUser));
       setCurrentUser(adminUser);
     } else {
-      setLoginError('Invalid Admin credentials. Use admin@time2coin.app / SuperAdmin2026!');
+      setLoginError('Invalid Admin credentials.');
     }
   };
 
@@ -79,7 +79,7 @@ export default function AdminControlVault() {
     alert(`Initiating 1-Click Data Extraction for: [${type.toUpperCase()}]\nDownloading raw CSV/JSON dataset...`);
   };
 
-  // IF NOT LOGGED IN AS ADMIN: SHOW SECURE GATING CARD
+  // STRICT GATING: IF NOT LOGGED IN AS ADMIN, RENDER ONLY THE LOGIN CARD
   if (!currentUser || currentUser.role !== 'admin') {
     return (
       <div className="min-h-screen bg-slate-950 text-slate-100 font-sans p-6 flex items-center justify-center">
@@ -89,7 +89,7 @@ export default function AdminControlVault() {
               <ShieldCheck className="w-7 h-7" />
             </div>
             <h1 className="text-xl font-extrabold text-white">Super Admin Control Vault</h1>
-            <p className="text-xs text-slate-400">Restricted Administrative System • Authentication Required</p>
+            <p className="text-xs text-slate-400">Restricted Access • Please authenticate to continue</p>
           </div>
 
           <form onSubmit={handleDirectAdminLogin} className="space-y-4">
@@ -100,6 +100,7 @@ export default function AdminControlVault() {
                 required
                 value={adminEmail}
                 onChange={(e) => setAdminEmail(e.target.value)}
+                placeholder="admin@time2coin.app"
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
               />
             </div>
@@ -111,6 +112,7 @@ export default function AdminControlVault() {
                 required
                 value={adminPassword}
                 onChange={(e) => setAdminPassword(e.target.value)}
+                placeholder="••••••••••••"
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
               />
             </div>
@@ -168,7 +170,7 @@ export default function AdminControlVault() {
           </div>
 
           <div className="flex bg-slate-900 border border-slate-800 p-1 rounded-2xl">
-            {[1, 2, 3, 4].map((tier) => (
+            {.map((tier) => (
               <button
                 key={tier}
                 onClick={() => setSelectedTier(tier as any)}
