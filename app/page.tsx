@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Clock, ShieldCheck, HeartHandshake, Award, QrCode, Star, Lock, 
   CheckCircle2, AlertCircle, Sparkles, ArrowRight, User, Check, 
   RefreshCw, Sliders, ChevronRight, Utensils, Wifi, Building2, 
-  SlidersHorizontal, Download, FileText, Users, HelpCircle
+  SlidersHorizontal, Download, FileText, Users, HelpCircle, LogIn, LogOut, Menu, X
 } from 'lucide-react';
 
 type TransactionStatus = 'REQUESTED' | 'ESCROW_LOCKED' | 'SERVICE_DELIVERED' | 'VERIFIED_AND_PAID' | 'RATED';
@@ -44,6 +44,22 @@ export default function Time2CoinMainApp() {
   const [walletBalance, setWalletBalance] = useState<number>(120);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'services' | 'escrow' | 'food' | 'mesh' | 'review'>('dashboard');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('time2coin_user');
+    if (saved) {
+      try {
+        setCurrentUser(JSON.parse(saved));
+      } catch (e) {}
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('time2coin_user');
+    setCurrentUser(null);
+  };
 
   const [services] = useState<ServiceItem[]>([
     {
@@ -120,6 +136,11 @@ export default function Time2CoinMainApp() {
   };
 
   const handleLockEscrow = (service: ServiceItem) => {
+    if (!currentUser) {
+      alert("Please Sign In first to lock escrow for community services.");
+      window.location.href = '/auth';
+      return;
+    }
     if (walletBalance < service.estimatedMinutes) {
       alert("Insufficient Time Coins in wallet balance!");
       return;
@@ -179,25 +200,26 @@ export default function Time2CoinMainApp() {
     : services.filter(s => s.category === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 font-sans pb-16">
+    <div className="min-h-screen bg-slate-900 text-slate-100 font-sans pb-16 overflow-x-hidden w-full">
       {/* GLOBAL HEADER */}
-      <header className="border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-tr from-cyan-500 to-blue-600 p-2 rounded-xl shadow-lg shadow-cyan-500/20">
-              <Clock className="w-6 h-6 text-white" />
+      <header className="border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-50 w-full">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-2 w-full">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="bg-gradient-to-tr from-cyan-500 to-blue-600 p-2 rounded-xl shadow-lg shadow-cyan-500/20 shrink-0">
+              <Clock className="w-5 h-5 text-white" />
             </div>
-            <div>
-              <h1 className="font-bold text-xl tracking-tight bg-gradient-to-r from-white via-slate-200 to-cyan-400 bg-clip-text text-transparent">
+            <div className="min-w-0">
+              <h1 className="font-bold text-lg sm:text-xl tracking-tight bg-gradient-to-r from-white via-slate-200 to-cyan-400 bg-clip-text text-transparent truncate">
                 time2coin
               </h1>
-              <span className="text-xs text-cyan-400/90 font-semibold">1 Hour = 1 Hour Universal Time Equity</span>
+              <span className="text-[10px] sm:text-xs text-cyan-400/90 font-semibold hidden sm:inline-block">1 Hour = 1 Hour Universal Time Equity</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* DESKTOP MENU LINKS */}
+          <div className="hidden md:flex items-center gap-2 shrink-0">
             <a href="/" className="px-3 py-1.5 bg-cyan-950 border border-cyan-800 text-cyan-300 rounded-lg text-xs font-semibold hover:bg-cyan-900 transition">
-              Dashboard
+              Home
             </a>
             <a href="/merchant" className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-semibold transition flex items-center gap-1">
               <Utensils className="w-3.5 h-3.5 text-amber-400" /> Merchant
@@ -205,24 +227,89 @@ export default function Time2CoinMainApp() {
             <a href="/corporate" className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-semibold transition flex items-center gap-1">
               <Building2 className="w-3.5 h-3.5 text-blue-400" /> Corporate
             </a>
-            <a href="/admin" className="px-3 py-1.5 bg-emerald-950 border border-emerald-800 text-emerald-300 rounded-lg text-xs font-semibold hover:bg-emerald-900 transition flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Admin Vault
-            </a>
             <a href="/terms" className="px-3 py-1.5 bg-slate-900 border border-slate-800 text-slate-300 rounded-lg text-xs font-semibold hover:bg-slate-800 transition">
-              Mission & Terms
+              Vision & Mission
             </a>
-            <div className="bg-slate-900 border border-slate-800 rounded-full px-3 py-1 flex items-center gap-1.5 ml-2">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-              <span className="font-bold text-xs text-cyan-300">{walletBalance} Mins</span>
-            </div>
+
+            {currentUser ? (
+              <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1 rounded-xl">
+                <div className="text-right">
+                  <span className="text-xs font-bold text-white block">{currentUser.name}</span>
+                  <span className="text-[10px] text-cyan-400 block">{currentUser.role}</span>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  title="Logout"
+                  className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition ml-1"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <a 
+                href="/auth" 
+                className="px-3.5 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-cyan-600/20"
+              >
+                <LogIn className="w-3.5 h-3.5" /> Sign In / Sign Out
+              </a>
+            )}
+
+            {/* BALANCE PILL (SHOW ONLY WHEN LOGGED IN) */}
+            {currentUser && (
+              <div className="bg-slate-900 border border-slate-800 rounded-full px-3 py-1 flex items-center gap-1.5 ml-1">
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                <span className="font-bold text-xs text-cyan-300">{walletBalance} Mins</span>
+              </div>
+            )}
+          </div>
+
+          {/* MOBILE MENU TOGGLE BUTTON */}
+          <div className="flex md:hidden items-center gap-2">
+            {currentUser && (
+              <div className="bg-slate-900 border border-slate-800 rounded-full px-2.5 py-1 flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-cyan-400" />
+                <span className="font-bold text-[11px] text-cyan-300">{walletBalance}m</span>
+              </div>
+            )}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 bg-slate-900 border border-slate-800 rounded-xl text-slate-200"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
+
+        {/* MOBILE MENU DROPDOWN */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-slate-950 border-b border-slate-800 px-4 py-3 space-y-2 text-xs">
+            <a href="/" className="block py-2 text-cyan-300 font-semibold border-b border-slate-900">Home</a>
+            <a href="/merchant" className="block py-2 text-slate-300 hover:text-white border-b border-slate-900">Merchant Portal</a>
+            <a href="/corporate" className="block py-2 text-slate-300 hover:text-white border-b border-slate-900">Corporate Portal</a>
+            <a href="/terms" className="block py-2 text-slate-300 hover:text-white border-b border-slate-900">Vision & Mission</a>
+            {currentUser ? (
+              <div className="pt-2 flex justify-between items-center">
+                <div>
+                  <span className="font-bold text-white block">{currentUser.name}</span>
+                  <span className="text-[10px] text-cyan-400">{currentUser.role}</span>
+                </div>
+                <button onClick={handleLogout} className="px-3 py-1.5 bg-rose-950 text-rose-300 border border-rose-800 rounded-lg font-bold flex items-center gap-1">
+                  <LogOut className="w-3.5 h-3.5" /> Logout
+                </button>
+              </div>
+            ) : (
+              <a href="/auth" className="block w-full text-center py-2 bg-cyan-600 text-white font-bold rounded-xl mt-2">
+                Sign In / Sign Out
+              </a>
+            )}
+          </div>
+        )}
       </header>
 
-      {/* DUAL-COLUMN BODY (SIDEBAR + CONTENT) */}
-      <div className="max-w-7xl mx-auto px-4 pt-6 flex gap-6">
+      {/* BODY CONTENT */}
+      <div className="max-w-7xl mx-auto px-4 pt-6 flex flex-col lg:flex-row gap-6 w-full">
         {/* DESKTOP SIDEBAR */}
-        <aside className="hidden lg:block w-64 bg-slate-950 border border-slate-800 rounded-3xl p-4 h-fit sticky top-20 space-y-2 shadow-xl">
+        <aside className="hidden lg:block w-64 bg-slate-950 border border-slate-800 rounded-3xl p-4 h-fit sticky top-20 space-y-2 shadow-xl shrink-0">
           <div className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-slate-400">Navigation Hub</div>
           <button onClick={() => setActiveTab('dashboard')} className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition ${activeTab === 'dashboard' ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'}`}>
             <Clock className="w-4 h-4" /> Member Dashboard
@@ -252,28 +339,33 @@ export default function Time2CoinMainApp() {
           <a href="/corporate" className="flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-900 hover:text-blue-300 transition">
             <Building2 className="w-4 h-4" /> Corporate CSR Portal
           </a>
-          <a href="/admin" className="flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold text-emerald-400 hover:bg-emerald-950/50 transition">
-            <ShieldCheck className="w-4 h-4" /> Staff Admin Vault (Tiers 1-4)
-          </a>
         </aside>
 
+        {/* MOBILE TABS HEADER */}
+        <div className="lg:hidden flex overflow-x-auto gap-2 pb-2 border-b border-slate-800 w-full text-xs">
+          <button onClick={() => setActiveTab('dashboard')} className={`px-3 py-2 rounded-xl font-semibold whitespace-nowrap ${activeTab === 'dashboard' ? 'bg-cyan-600 text-white' : 'bg-slate-950 text-slate-400'}`}>Dashboard</button>
+          <button onClick={() => setActiveTab('services')} className={`px-3 py-2 rounded-xl font-semibold whitespace-nowrap ${activeTab === 'services' ? 'bg-cyan-600 text-white' : 'bg-slate-950 text-slate-400'}`}>Services</button>
+          <button onClick={() => setActiveTab('escrow')} className={`px-3 py-2 rounded-xl font-semibold whitespace-nowrap ${activeTab === 'escrow' ? 'bg-cyan-600 text-white' : 'bg-slate-950 text-slate-400'}`}>Escrow</button>
+          <button onClick={() => setActiveTab('food')} className={`px-3 py-2 rounded-xl font-semibold whitespace-nowrap ${activeTab === 'food' ? 'bg-cyan-600 text-white' : 'bg-slate-950 text-slate-400'}`}>Food Rescue</button>
+          <button onClick={() => setActiveTab('mesh')} className={`px-3 py-2 rounded-xl font-semibold whitespace-nowrap ${activeTab === 'mesh' ? 'bg-cyan-600 text-white' : 'bg-slate-950 text-slate-400'}`}>BLE Mesh</button>
+        </div>
+
         {/* MAIN CONTENT AREA */}
-        <main className="flex-1 space-y-6">
-          
+        <main className="flex-1 space-y-6 min-w-0 w-full">
           {/* HERO MISSION BANNER */}
-          <section className="bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden">
+          <section className="bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl relative overflow-hidden w-full">
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-2 bg-cyan-950/80 border border-cyan-800/60 px-3 py-1 rounded-full text-xs font-bold text-cyan-300 mb-3">
                 <Sparkles className="w-3.5 h-3.5 text-cyan-400" /> Blue Ocean Social Enterprise
               </div>
-              <h2 className="text-2xl font-extrabold text-white tracking-tight mb-2">
+              <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight mb-2">
                 Replacing Cash Friction with Universal Time Equity
               </h2>
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-4">
                 <strong>time2coin</strong> values every human hour equally (1 Hour = 1 Hour). Earn time credits through bicycle repair, elder care, or skill sharing—and spend those same coins on local restaurant surplus food or mutual aid care without cash.
               </p>
 
-              <div className="grid grid-cols-3 gap-2 text-center text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center text-xs">
                 <div className="bg-slate-900/90 border border-slate-800 p-2.5 rounded-xl">
                   <span className="font-bold text-emerald-400 block">95% Provider Pay</span>
                   <span className="text-slate-400 text-[10px]">Zero Cash Transaction Fees</span>
@@ -292,23 +384,32 @@ export default function Time2CoinMainApp() {
 
           {/* TAB 1: DASHBOARD */}
           {activeTab === 'dashboard' && (
-            <div className="space-y-6">
-              <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 border border-slate-800 rounded-3xl p-6 shadow-2xl">
+            <div className="space-y-6 w-full">
+              <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl w-full">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                   <div>
-                    <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold">Verified Time Wallet</span>
-                    <div className="flex items-baseline gap-2 mt-1">
-                      <span className="text-4xl font-extrabold text-white">{walletBalance}</span>
-                      <span className="text-lg text-cyan-400 font-medium">Time Coins (Mins)</span>
-                    </div>
-                    <p className="text-xs text-slate-400 mt-1">Earned via P2P labor • Redeemable anywhere for skills or surplus food</p>
+                    <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold">
+                      {currentUser ? `Welcome Back, ${currentUser.name}` : 'Verified Time Wallet Preview'}
+                    </span>
+                    {currentUser ? (
+                      <div className="flex items-baseline gap-2 mt-1">
+                        <span className="text-3xl sm:text-4xl font-extrabold text-white">{walletBalance}</span>
+                        <span className="text-base sm:text-lg text-cyan-400 font-medium">Time Coins (Mins)</span>
+                      </div>
+                    ) : (
+                      <div className="mt-2 p-3 bg-slate-900/90 border border-slate-800 rounded-xl">
+                        <span className="text-xs text-slate-300 block">Sign in to view your live balance and execute P2P time trades.</span>
+                        <a href="/auth" className="inline-block mt-2 px-3 py-1.5 bg-cyan-600 text-white rounded-lg text-xs font-bold">Sign In Now</a>
+                      </div>
+                    )}
+                    <p className="text-xs text-slate-400 mt-2">Earned via P2P labor • Redeemable anywhere for skills or surplus food</p>
                   </div>
 
-                  <div className="bg-cyan-950/60 border border-cyan-800/50 rounded-2xl p-3 flex items-center gap-3">
-                    <Award className="w-8 h-8 text-cyan-400" />
+                  <div className="bg-cyan-950/60 border border-cyan-800/50 rounded-2xl p-3 flex items-center gap-3 shrink-0">
+                    <Award className="w-7 h-7 text-cyan-400" />
                     <div>
                       <div className="text-xs text-slate-300 font-medium">Trust Score</div>
-                      <div className="text-sm font-bold text-cyan-300">4.95 ★ (Top Tier)</div>
+                      <div className="text-xs sm:text-sm font-bold text-cyan-300">4.95 ★ (Top Tier)</div>
                     </div>
                   </div>
                 </div>
@@ -318,26 +419,26 @@ export default function Time2CoinMainApp() {
                     <ShieldCheck className="w-4 h-4 text-emerald-400" />
                     <span className="text-xs font-bold text-slate-200 uppercase tracking-wide">Feature 5 Split Engine Active</span>
                   </div>
-                  <p className="text-xs text-slate-400 leading-relaxed mb-3">
+                  <p className="text-xs text-slate-400 leading-relaxed">
                     Your transactions automatically contribute 4% to the local community mutual aid reserve pool and 1% to open-source maintainers.
                   </p>
                 </div>
               </div>
 
               {activeJob && activeJob.status !== 'RATED' && (
-                <div className="bg-gradient-to-r from-cyan-950/80 to-blue-950/80 border border-cyan-800/60 rounded-2xl p-4 flex items-center justify-between">
+                <div className="bg-gradient-to-r from-cyan-950/80 to-blue-950/80 border border-cyan-800/60 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="p-3 bg-cyan-600/20 rounded-xl border border-cyan-500/30">
+                    <div className="p-3 bg-cyan-600/20 rounded-xl border border-cyan-500/30 shrink-0">
                       <Lock className="w-5 h-5 text-cyan-400 animate-pulse" />
                     </div>
                     <div>
-                      <span className="text-xs text-cyan-400 font-semibold uppercase tracking-wide">Active Escrow Job Locked</span>
-                      <h4 className="text-sm font-bold text-white">{activeJob.serviceTitle}</h4>
+                      <span className="text-[10px] sm:text-xs text-cyan-400 font-semibold uppercase tracking-wide">Active Escrow Job Locked</span>
+                      <h4 className="text-xs sm:text-sm font-bold text-white">{activeJob.serviceTitle}</h4>
                       <span className="text-xs text-slate-400">With {activeJob.providerName} • {activeJob.grossMinutes} Mins</span>
                     </div>
                   </div>
 
-                  <button onClick={() => setActiveTab('escrow')} className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-cyan-600/30">
+                  <button onClick={() => setActiveTab('escrow')} className="w-full sm:w-auto px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-lg">
                     Verify PIN <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -347,7 +448,7 @@ export default function Time2CoinMainApp() {
 
           {/* TAB 2: SERVICE DIRECTORY */}
           {activeTab === 'services' && (
-            <div className="space-y-4">
+            <div className="space-y-4 w-full">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h3 className="text-base font-bold text-white">Community Service Directory</h3>
                 <div className="flex flex-wrap gap-1.5">
@@ -359,34 +460,34 @@ export default function Time2CoinMainApp() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
                 {filteredServices.map((service) => (
-                  <div key={service.id} className="bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-4 hover:border-slate-700 transition flex flex-col justify-between">
+                  <div key={service.id} className="bg-slate-950 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-4 hover:border-slate-700 transition flex flex-col justify-between w-full">
                     <div>
                       <div className="flex justify-between items-start mb-2">
-                        <span className="text-xs font-semibold text-cyan-400 bg-cyan-950 px-2.5 py-0.5 rounded-full border border-cyan-800/50">
+                        <span className="text-[10px] font-semibold text-cyan-400 bg-cyan-950 px-2 py-0.5 rounded-full border border-cyan-800/50">
                           {service.category}
                         </span>
                         <div className="text-right">
-                          <span className="text-lg font-black text-white">{service.estimatedMinutes}</span>
+                          <span className="text-base sm:text-lg font-black text-white">{service.estimatedMinutes}</span>
                           <span className="text-xs text-slate-400 ml-1">Coins</span>
                         </div>
                       </div>
-                      <h3 className="font-bold text-slate-100 text-base">{service.title}</h3>
+                      <h3 className="font-bold text-slate-100 text-sm sm:text-base">{service.title}</h3>
                       <p className="text-xs text-slate-400 leading-relaxed mt-2">{service.description}</p>
                     </div>
 
                     <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
                       <div>
                         <div className="text-xs text-slate-200 font-semibold">{service.providerName}</div>
-                        <div className="flex items-center gap-2 text-xs">
+                        <div className="flex items-center gap-2 text-[10px] sm:text-xs">
                           <span className="text-amber-400 font-bold">★ {service.providerRating}</span>
                           <span className="text-slate-500">•</span>
                           <span className="text-emerald-400 font-medium">{service.providerTrustScore}% Trust Score</span>
                         </div>
                       </div>
 
-                      <button onClick={() => handleLockEscrow(service)} className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-cyan-600/20 flex items-center gap-1.5">
+                      <button onClick={() => handleLockEscrow(service)} className="px-3 py-1.5 sm:px-4 sm:py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-xs rounded-xl transition flex items-center gap-1">
                         <Lock className="w-3.5 h-3.5" /> Book Job
                       </button>
                     </div>
@@ -398,15 +499,15 @@ export default function Time2CoinMainApp() {
 
           {/* TAB 3: ESCROW MACHINE & PIN */}
           {activeTab === 'escrow' && activeJob && (
-            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-6">
+            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-6 w-full">
               <div className="flex items-center justify-between border-b border-slate-800 pb-4">
                 <div>
                   <span className="text-xs font-bold text-cyan-400 uppercase tracking-wide">Active Escrow Job</span>
-                  <h2 className="text-xl font-extrabold text-white mt-0.5">{activeJob.serviceTitle}</h2>
+                  <h2 className="text-lg sm:text-xl font-extrabold text-white mt-0.5">{activeJob.serviceTitle}</h2>
                   <p className="text-xs text-slate-400 mt-1">Provider: {activeJob.providerName}</p>
                 </div>
                 <div className="text-right">
-                  <span className="text-2xl font-black text-cyan-300">{activeJob.grossMinutes}</span>
+                  <span className="text-xl sm:text-2xl font-black text-cyan-300">{activeJob.grossMinutes}</span>
                   <span className="text-xs text-slate-400 block">Gross Mins</span>
                 </div>
               </div>
@@ -427,10 +528,10 @@ export default function Time2CoinMainApp() {
               </div>
 
               {activeJob.status === 'ESCROW_LOCKED' && (
-                <div className="bg-gradient-to-b from-slate-900 to-slate-950 border border-cyan-900/50 rounded-2xl p-6 text-center space-y-4">
-                  <QrCode className="w-12 h-12 text-cyan-400 mx-auto animate-pulse" />
+                <div className="bg-gradient-to-b from-slate-900 to-slate-950 border border-cyan-900/50 rounded-2xl p-5 text-center space-y-4">
+                  <QrCode className="w-10 h-10 text-cyan-400 mx-auto animate-pulse" />
                   <div>
-                    <h3 className="font-bold text-white text-base">4-Digit Verification PIN</h3>
+                    <h3 className="font-bold text-white text-sm sm:text-base">4-Digit Verification PIN</h3>
                     <p className="text-xs text-slate-400 mt-1">Enter provider's 4-digit PIN to release funds from escrow</p>
                   </div>
 
@@ -441,7 +542,7 @@ export default function Time2CoinMainApp() {
                       value={enteredPin}
                       onChange={(e) => setEnteredPin(e.target.value)}
                       placeholder="e.g. 4829"
-                      className="w-full text-center text-2xl font-mono tracking-widest bg-slate-900 border border-slate-700 rounded-xl py-3 text-white focus:outline-none focus:border-cyan-500"
+                      className="w-full text-center text-2xl font-mono tracking-widest bg-slate-900 border border-slate-700 rounded-xl py-2.5 text-white focus:outline-none focus:border-cyan-500"
                     />
                     {pinError && (
                       <span className="text-xs text-rose-400 font-medium block mt-2 flex items-center justify-center gap-1">
@@ -450,7 +551,7 @@ export default function Time2CoinMainApp() {
                     )}
                   </div>
 
-                  <button onClick={handleVerifyAndRelease} className="w-full max-w-xs mx-auto py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm rounded-xl transition shadow-lg shadow-emerald-600/20">
+                  <button onClick={handleVerifyAndRelease} className="w-full max-w-xs mx-auto py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-lg">
                     Confirm & Release Pay
                   </button>
                 </div>
@@ -458,8 +559,8 @@ export default function Time2CoinMainApp() {
 
               {activeJob.status === 'VERIFIED_AND_PAID' && (
                 <div className="bg-emerald-950/40 border border-emerald-800/60 rounded-2xl p-6 text-center space-y-2">
-                  <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
-                  <h3 className="font-bold text-emerald-300 text-lg">Payment Released Successfully!</h3>
+                  <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto" />
+                  <h3 className="font-bold text-emerald-300 text-base sm:text-lg">Payment Released Successfully!</h3>
                   <p className="text-xs text-slate-400">95% credited to {activeJob.providerName}, 5% routed to reserves.</p>
                 </div>
               )}
@@ -468,9 +569,9 @@ export default function Time2CoinMainApp() {
 
           {/* TAB 4: FOOD RESCUE */}
           {activeTab === 'food' && (
-            <div className="space-y-4">
+            <div className="space-y-4 w-full">
               <div className="bg-amber-950/40 border border-amber-800/60 rounded-2xl p-4 flex items-center gap-3">
-                <Utensils className="w-8 h-8 text-amber-400" />
+                <Utensils className="w-7 h-7 text-amber-400 shrink-0" />
                 <div>
                   <h3 className="text-sm font-bold text-amber-300">Merchant Surplus Food Rescue</h3>
                   <p className="text-xs text-slate-300">Spend Time Coins earned anywhere in the community on fresh chef-prepared surplus meals from local restaurants.</p>
@@ -478,24 +579,24 @@ export default function Time2CoinMainApp() {
               </div>
 
               {services.filter(s => s.isMerchantSurplus).map((service) => (
-                <div key={service.id} className="bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-3">
+                <div key={service.id} className="bg-slate-950 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-3 w-full">
                   <div className="flex justify-between items-start">
                     <div>
-                      <span className="text-xs font-bold text-amber-400 bg-amber-950 px-2.5 py-0.5 rounded-full border border-amber-800/50">
+                      <span className="text-[10px] font-bold text-amber-400 bg-amber-950 px-2 py-0.5 rounded-full border border-amber-800/50">
                         Merchant Surplus
                       </span>
-                      <h4 className="font-bold text-white text-base mt-2">{service.title}</h4>
+                      <h4 className="font-bold text-white text-sm sm:text-base mt-2">{service.title}</h4>
                       <p className="text-xs text-slate-400 mt-1">{service.description}</p>
                     </div>
                     <div className="text-right">
-                      <span className="text-2xl font-black text-amber-300">{service.estimatedMinutes}</span>
+                      <span className="text-xl sm:text-2xl font-black text-amber-300">{service.estimatedMinutes}</span>
                       <span className="text-xs text-slate-400 block">Time Coins</span>
                     </div>
                   </div>
 
                   <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
                     <span className="text-xs text-slate-300 font-semibold">{service.providerName}</span>
-                    <button onClick={() => handleLockEscrow(service)} className="px-4 py-2 bg-gradient-to-r from-amber-600 to-amber-500 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-amber-600/20">
+                    <button onClick={() => handleLockEscrow(service)} className="px-3 py-1.5 sm:px-4 sm:py-2 bg-gradient-to-r from-amber-600 to-amber-500 text-white font-bold text-xs rounded-xl transition shadow-lg">
                       Redeem Surplus Meal
                     </button>
                   </div>
@@ -506,9 +607,9 @@ export default function Time2CoinMainApp() {
 
           {/* TAB 5: BLE MESH QUEUE */}
           {activeTab === 'mesh' && (
-            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 w-full">
               <div className="flex items-center gap-3">
-                <Wifi className="w-8 h-8 text-emerald-400 animate-pulse" />
+                <Wifi className="w-7 h-7 text-emerald-400 animate-pulse shrink-0" />
                 <div>
                   <h3 className="text-base font-bold text-white">Offline BLE Mesh Sync Engine</h3>
                   <p className="text-xs text-slate-400">Cryptographically signed Ed25519 receipts stored locally when internet is unavailable.</p>
@@ -526,7 +627,7 @@ export default function Time2CoinMainApp() {
                 </div>
               </div>
 
-              <button className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-2">
+              <button className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-2">
                 <RefreshCw className="w-4 h-4" /> Scan Nearby BLE Peers & Gossip Relay
               </button>
             </div>
@@ -534,8 +635,8 @@ export default function Time2CoinMainApp() {
 
           {/* TAB 6: REVIEW */}
           {activeTab === 'review' && activeJob && (
-            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 shadow-2xl max-w-lg mx-auto">
-              <h2 className="text-lg font-bold text-white mb-1">Double-Blind Service Review</h2>
+            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl max-w-lg mx-auto w-full">
+              <h2 className="text-base sm:text-lg font-bold text-white mb-1">Double-Blind Service Review</h2>
               <p className="text-xs text-slate-400 mb-6">Rate your experience with {activeJob.providerName}. Ratings remain hidden until both parties submit.</p>
 
               <form onSubmit={handleSubmitReview} className="space-y-5">
@@ -543,7 +644,7 @@ export default function Time2CoinMainApp() {
                   <label className="block text-xs font-semibold text-slate-300 mb-2">Rating</label>
                   <div className="flex gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
-                      <button key={star} type="button" onClick={() => setReviewRating(star)} className={`p-2 rounded-xl border text-sm font-bold transition flex-1 ${reviewRating >= star ? 'bg-amber-500/20 border-amber-500/50 text-amber-300' : 'bg-slate-900 border-slate-800 text-slate-500'}`}>
+                      <button key={star} type="button" onClick={() => setReviewRating(star)} className={`p-2 rounded-xl border text-xs sm:text-sm font-bold transition flex-1 ${reviewRating >= star ? 'bg-amber-500/20 border-amber-500/50 text-amber-300' : 'bg-slate-900 border-slate-800 text-slate-500'}`}>
                         ★ {star}
                       </button>
                     ))}
@@ -554,14 +655,14 @@ export default function Time2CoinMainApp() {
                   <label className="block text-xs font-semibold text-slate-300 mb-2">Positive Badges</label>
                   <div className="flex flex-wrap gap-2">
                     {['Punctual', 'Skilled', 'Polite', 'Clean Work', 'Highly Recommended'].map((tag) => (
-                      <button key={tag} type="button" onClick={() => toggleTag(tag)} className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${selectedTags.includes(tag) ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>
+                      <button key={tag} type="button" onClick={() => toggleTag(tag)} className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition ${selectedTags.includes(tag) ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>
                         {tag}
                       </button>
                     ))}
                   </div>
                 </div>
 
-                <button type="submit" disabled={reviewSubmitted} className="w-full py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 text-white font-bold text-sm rounded-xl transition flex items-center justify-center gap-2">
+                <button type="submit" disabled={reviewSubmitted} className="w-full py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-xs sm:text-sm rounded-xl transition flex items-center justify-center gap-2">
                   {reviewSubmitted ? <RefreshCw className="w-4 h-4 animate-spin" /> : 'Submit Rating'}
                 </button>
               </form>
