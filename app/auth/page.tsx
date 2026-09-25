@@ -2,11 +2,11 @@
 
 import React, { useState } from 'react';
 import { 
-  ShieldCheck, Lock, User, Utensils, Building2, Key, ArrowLeft, 
-  CheckCircle2, Sparkles, AlertCircle, LogIn, LogOut, HeartHandshake, Clock
+  Lock, User, Utensils, Building2, Key, ArrowLeft, 
+  CheckCircle2, AlertCircle, LogIn, HeartHandshake
 } from 'lucide-react';
 
-type UserRole = 'member' | 'donor' | 'merchant' | 'corporate' | 'admin';
+type UserRole = 'member' | 'donor' | 'merchant' | 'corporate';
 
 export default function AuthModule() {
   const [mode, setMode] = useState<'signin' | 'register'>('signin');
@@ -21,9 +21,8 @@ export default function AuthModule() {
   // Status States
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'pending'; text: string } | null>(null);
 
-  // Pre-configured Test Accounts
+  // Pre-configured Test Accounts (Public & Business Roles Only)
   const demoAccounts = {
-    admin: { email: 'admin@time2coin.app', password: 'SuperAdmin2026!', role: 'admin', status: 'APPROVED', name: 'Founder Admin', redirect: '/admin' },
     member: { email: 'member@time2coin.app', password: 'Member2026!', role: 'member', status: 'APPROVED', name: 'Sarah Jenkins', redirect: '/' },
     donor: { email: 'donor@time2coin.app', password: 'Donor2026!', role: 'donor', status: 'APPROVED', name: 'Alex Rivera (Donor)', redirect: '/corporate' },
     merchant: { email: 'merchant@time2coin.app', password: 'Merchant2026!', role: 'merchant', status: 'APPROVED', name: 'Green Garden Bistro', redirect: '/merchant' },
@@ -34,7 +33,6 @@ export default function AuthModule() {
     e.preventDefault();
     setMessage(null);
 
-    // Check stored user or demo accounts
     const target = demoAccounts[role as keyof typeof demoAccounts];
     if (email === target?.email && password === target?.password) {
       if (target.status === 'PENDING_ADMIN_APPROVAL') {
@@ -60,21 +58,19 @@ export default function AuthModule() {
       role,
       name: orgName || fullName || email.split('@')[0],
       status: requiresApproval ? 'PENDING_ADMIN_APPROVAL' : 'APPROVED',
-      redirect: role === 'admin' ? '/admin' : role === 'merchant' ? '/merchant' : role === 'corporate' || role === 'donor' ? '/corporate' : '/'
+      redirect: role === 'merchant' ? '/merchant' : role === 'corporate' || role === 'donor' ? '/corporate' : '/'
     };
 
     if (requiresApproval) {
-      // Store in pending queue for Admin review
       const pendingQueue = JSON.parse(localStorage.getItem('time2coin_pending_approvals') || '[]');
       pendingQueue.push(newUser);
       localStorage.setItem('time2coin_pending_approvals', JSON.stringify(pendingQueue));
 
       setMessage({
         type: 'pending',
-        text: `Application Submitted! ${role.toUpperCase()} accounts require manual Admin approval. Tier 1/4 Admins will review your registration shortly.`
+        text: `Application Submitted! ${role.toUpperCase()} accounts require manual Admin verification before access is granted.`
       });
     } else {
-      // Auto approve Public Users & Donors
       localStorage.setItem('time2coin_user', JSON.stringify(newUser));
       setMessage({
         type: 'success',
@@ -99,8 +95,8 @@ export default function AuthModule() {
             <ArrowLeft className="w-4 h-4" /> Back to App
           </a>
           <div className="text-right">
-            <h1 className="font-bold text-lg text-white tracking-tight">time2coin Security Vault</h1>
-            <span className="text-xs text-cyan-400 font-semibold">Unified Authentication Module</span>
+            <h1 className="font-bold text-lg text-white tracking-tight">time2coin Portal Access</h1>
+            <span className="text-xs text-cyan-400 font-semibold">User Authentication</span>
           </div>
         </header>
 
@@ -120,22 +116,19 @@ export default function AuthModule() {
           </button>
         </div>
 
-        {/* ROLE TABS */}
-        <div className="grid grid-cols-5 gap-1 bg-slate-900 border border-slate-800 p-1 rounded-2xl mb-6 text-[11px]">
-          <button onClick={() => { setRole('member'); setEmail('member@time2coin.app'); setPassword('Member2026!'); }} className={`py-2 rounded-xl font-bold transition flex items-center justify-center gap-1 ${role === 'member' ? 'bg-cyan-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}>
-            <User className="w-3 h-3" /> Public
+        {/* ROLE TABS (MEMBER, DONOR, MERCHANT, CORPORATE ONLY) */}
+        <div className="grid grid-cols-4 gap-1.5 bg-slate-900 border border-slate-800 p-1.5 rounded-2xl mb-6 text-xs">
+          <button onClick={() => { setRole('member'); setEmail('member@time2coin.app'); setPassword('Member2026!'); }} className={`py-2.5 rounded-xl font-bold transition flex items-center justify-center gap-1.5 ${role === 'member' ? 'bg-cyan-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}>
+            <User className="w-3.5 h-3.5" /> Public
           </button>
-          <button onClick={() => { setRole('donor'); setEmail('donor@time2coin.app'); setPassword('Donor2026!'); }} className={`py-2 rounded-xl font-bold transition flex items-center justify-center gap-1 ${role === 'donor' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}>
-            <HeartHandshake className="w-3 h-3" /> Donor
+          <button onClick={() => { setRole('donor'); setEmail('donor@time2coin.app'); setPassword('Donor2026!'); }} className={`py-2.5 rounded-xl font-bold transition flex items-center justify-center gap-1.5 ${role === 'donor' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}>
+            <HeartHandshake className="w-3.5 h-3.5" /> Donor
           </button>
-          <button onClick={() => { setRole('merchant'); setEmail('merchant@time2coin.app'); setPassword('Merchant2026!'); }} className={`py-2 rounded-xl font-bold transition flex items-center justify-center gap-1 ${role === 'merchant' ? 'bg-amber-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}>
-            <Utensils className="w-3 h-3" /> Merchant
+          <button onClick={() => { setRole('merchant'); setEmail('merchant@time2coin.app'); setPassword('Merchant2026!'); }} className={`py-2.5 rounded-xl font-bold transition flex items-center justify-center gap-1.5 ${role === 'merchant' ? 'bg-amber-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}>
+            <Utensils className="w-3.5 h-3.5" /> Merchant
           </button>
-          <button onClick={() => { setRole('corporate'); setEmail('corporate@time2coin.app'); setPassword('Corporate2026!'); }} className={`py-2 rounded-xl font-bold transition flex items-center justify-center gap-1 ${role === 'corporate' ? 'bg-purple-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}>
-            <Building2 className="w-3 h-3" /> Corporate
-          </button>
-          <button onClick={() => { setRole('admin'); setEmail('admin@time2coin.app'); setPassword('SuperAdmin2026!'); }} className={`py-2 rounded-xl font-bold transition flex items-center justify-center gap-1 ${role === 'admin' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}>
-            <ShieldCheck className="w-3 h-3" /> Admin
+          <button onClick={() => { setRole('corporate'); setEmail('corporate@time2coin.app'); setPassword('Corporate2026!'); }} className={`py-2.5 rounded-xl font-bold transition flex items-center justify-center gap-1.5 ${role === 'corporate' ? 'bg-purple-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}>
+            <Building2 className="w-3.5 h-3.5" /> Corporate
           </button>
         </div>
 
@@ -143,7 +136,7 @@ export default function AuthModule() {
           <div className="flex items-center justify-between border-b border-slate-800 pb-4">
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">
-                {role === 'merchant' ? 'Merchant Food Rescue' : role === 'corporate' ? 'ESG Corporate Sponsor' : role === 'donor' ? 'Individual CSR Donor' : role === 'admin' ? 'Super Admin Vault' : 'Public Time Wallet'}
+                {role === 'merchant' ? 'Merchant Food Rescue' : role === 'corporate' ? 'ESG Corporate Sponsor' : role === 'donor' ? 'Individual CSR Donor' : 'Public Time Wallet'}
               </span>
               <h2 className="text-lg font-extrabold text-white mt-0.5">
                 {mode === 'signin' ? `Sign In as ${role.toUpperCase()}` : `Register as ${role.toUpperCase()}`}
@@ -217,34 +210,30 @@ export default function AuthModule() {
             </button>
           </form>
 
-          {/* 1-CLICK DEMO SHORTCUTS */}
+          {/* DEMO SHORTCUTS (PUBLIC ROLES ONLY) */}
           <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-3">
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
-              ⚡ 1-Click Quick Demo Login Shortcuts:
+              ⚡ 1-Click Demo Login Shortcuts:
             </span>
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <button onClick={() => handleQuickDemoLogin('admin')} className="p-2.5 bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-800/60 rounded-xl text-left transition">
-                <span className="font-bold text-emerald-300 block">👑 Super Admin</span>
-                <span className="text-[10px] text-slate-400 block truncate">admin@time2coin.app</span>
-                <span className="text-[10px] font-mono text-emerald-400 block mt-0.5">SuperAdmin2026!</span>
-              </button>
-
               <button onClick={() => handleQuickDemoLogin('member')} className="p-2.5 bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-800/60 rounded-xl text-left transition">
                 <span className="font-bold text-cyan-300 block">👤 Public Member</span>
                 <span className="text-[10px] text-slate-400 block truncate">member@time2coin.app</span>
-                <span className="text-[10px] font-mono text-cyan-400 block mt-0.5">Member2026!</span>
+              </button>
+
+              <button onClick={() => handleQuickDemoLogin('donor')} className="p-2.5 bg-blue-950/60 hover:bg-blue-900/60 border border-blue-800/60 rounded-xl text-left transition">
+                <span className="font-bold text-blue-300 block">❤️ Individual Donor</span>
+                <span className="text-[10px] text-slate-400 block truncate">donor@time2coin.app</span>
               </button>
 
               <button onClick={() => handleQuickDemoLogin('merchant')} className="p-2.5 bg-amber-950/60 hover:bg-amber-900/60 border border-amber-800/60 rounded-xl text-left transition">
                 <span className="font-bold text-amber-300 block">🏪 Merchant</span>
                 <span className="text-[10px] text-slate-400 block truncate">merchant@time2coin.app</span>
-                <span className="text-[10px] font-mono text-amber-400 block mt-0.5">Merchant2026!</span>
               </button>
 
               <button onClick={() => handleQuickDemoLogin('corporate')} className="p-2.5 bg-purple-950/60 hover:bg-purple-900/60 border border-purple-800/60 rounded-xl text-left transition">
                 <span className="font-bold text-purple-300 block">🏢 Corporate</span>
                 <span className="text-[10px] text-slate-400 block truncate">corporate@time2coin.app</span>
-                <span className="text-[10px] font-mono text-purple-400 block mt-0.5">Corporate2026!</span>
               </button>
             </div>
           </div>
