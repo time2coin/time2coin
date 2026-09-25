@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ShieldCheck, Sliders, Download, FileText, Database, Users, 
-  AlertTriangle, RefreshCw, CheckCircle2, Search, Lock, ArrowLeft
+  AlertTriangle, RefreshCw, CheckCircle2, Search, Lock, ArrowLeft, LogIn, LogOut
 } from 'lucide-react';
 
 export default function AdminControlVault() {
@@ -11,6 +11,21 @@ export default function AdminControlVault() {
   const [providerSplit, setProviderSplit] = useState<number>(95);
   const [mutualAidSplit, setMutualAidSplit] = useState<number>(4);
   const [vaultSplit, setVaultSplit] = useState<number>(1);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('time2coin_user');
+    if (saved) {
+      try {
+        setCurrentUser(JSON.parse(saved));
+      } catch (e) {}
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('time2coin_user');
+    setCurrentUser(null);
+  };
 
   const handleExportData = (type: 'users' | 'ledger' | 'audit' | 'sql') => {
     alert(`Initiating 1-Click Data Extraction for: [${type.toUpperCase()}]\nDownloading secure CSV/JSON raw dataset...`);
@@ -31,27 +46,42 @@ export default function AdminControlVault() {
           </div>
         </div>
 
-        {/* ROLE TIER SELECTOR */}
-        <div className="flex bg-slate-900 border border-slate-800 p-1 rounded-2xl">
-          {[1, 2, 3, 4].map((tier) => (
-            <button
-              key={tier}
-              onClick={() => setSelectedTier(tier as any)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
-                selectedTier === tier
-                  ? 'bg-emerald-600 text-white shadow-lg'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              Tier {tier}
-            </button>
-          ))}
+        <div className="flex items-center gap-3">
+          {currentUser ? (
+            <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl">
+              <div className="text-right">
+                <span className="text-xs font-bold text-white block">{currentUser.name}</span>
+                <span className="text-[10px] text-emerald-400 block">{currentUser.role}</span>
+              </div>
+              <button onClick={handleLogout} className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition ml-1" title="Logout">
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <a href="/auth" className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+              <LogIn className="w-3.5 h-3.5" /> Admin Login
+            </a>
+          )}
+
+          <div className="flex bg-slate-900 border border-slate-800 p-1 rounded-2xl">
+            {[1, 2, 3, 4].map((tier) => (
+              <button
+                key={tier}
+                onClick={() => setSelectedTier(tier as any)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                  selectedTier === tier
+                    ? 'bg-emerald-600 text-white shadow-lg'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                Tier {tier}
+              </button>
+            ))}
+          </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto space-y-6">
-        
-        {/* TIER INDICATOR BANNER */}
         <div className="bg-emerald-950/40 border border-emerald-800/60 rounded-2xl p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <ShieldCheck className="w-6 h-6 text-emerald-400" />
@@ -66,7 +96,6 @@ export default function AdminControlVault() {
           </div>
         </div>
 
-        {/* TIER 4 ONLY: GLOBAL PARAMETER SLIDERS */}
         {selectedTier === 4 && (
           <section className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
             <h2 className="text-base font-bold text-white flex items-center gap-2">
@@ -102,7 +131,6 @@ export default function AdminControlVault() {
           </section>
         )}
 
-        {/* DATA EXTRACTION ENGINE (TIER 4 & TIER 2) */}
         {(selectedTier === 4 || selectedTier === 2) && (
           <section className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
             <h2 className="text-base font-bold text-white flex items-center gap-2">
@@ -133,7 +161,6 @@ export default function AdminControlVault() {
             </div>
           </section>
         )}
-
       </main>
     </div>
   );
