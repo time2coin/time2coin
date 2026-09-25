@@ -3,8 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ShieldCheck, Sliders, Download, FileText, Database, Users, 
-  AlertTriangle, RefreshCw, CheckCircle2, Search, Lock, ArrowLeft, LogOut, Check, X, Key
+  AlertTriangle, RefreshCw, CheckCircle2, Search, Lock, ArrowLeft, LogOut, Check, X, Key, Globe, Save
 } from 'lucide-react';
+
+const TIERS_LIST = [1, 2, 3, 4] as const;
 
 export default function AdminControlVault() {
   const [selectedTier, setSelectedTier] = useState<1 | 2 | 3 | 4>(4);
@@ -17,6 +19,23 @@ export default function AdminControlVault() {
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [loginError, setLoginError] = useState('');
+
+  // Static Narrative / Multi-Language Content State
+  const [activeLang, setActiveLang] = useState<'en' | 'ms'>('en');
+  const [narratives, setNarratives] = useState<Record<string, { en: string; ms: string }>>({
+    'menu.home': { en: 'Home', ms: 'Utama' },
+    'menu.merchant': { en: 'Merchant', ms: 'Peniaga' },
+    'menu.corporate': { en: 'Corporate', ms: 'Korporat' },
+    'menu.vision': { en: 'Vision & Mission', ms: 'Visi & Misi' },
+    'menu.signin': { en: 'Sign In / Sign Out', ms: 'Log Masuk / Keluar' },
+    'hero.title': { en: 'Replacing Cash Friction with Universal Time Equity', ms: 'Menggantikan Geseran Tunai dengan Ekuiti Masa Universal' },
+    'hero.subtitle': { en: 'time2coin values every human hour equally (1 Hour = 1 Hour). Earn time credits through bicycle repair, elder care, or skill sharing—and spend those same coins on local restaurant surplus food or mutual aid care without cash.', ms: 'time2coin menilai setiap jam manusia secara saksama (1 Jam = 1 Jam). Raih kredit masa melalui pembaikan basikal, penjagaan warga emas, atau perkongsian kemahiran.' },
+    'badge.providerPay': { en: '95% Provider Pay', ms: '95% Bayaran Penyedia' },
+    'badge.mutualAid': { en: '4% Mutual Aid', ms: '4% Bantuan Bersama' },
+    'badge.platformVault': { en: '1% Platform Vault', ms: '1% Tabung Platform' }
+  });
+
+  const [savedSuccess, setSavedSuccess] = useState(false);
 
   // Pending Applicant Queue State
   const [pendingApplicants, setPendingApplicants] = useState<any[]>([
@@ -39,6 +58,13 @@ export default function AdminControlVault() {
     if (storedPending.length > 0) {
       setPendingApplicants(prev => [...prev, ...storedPending]);
     }
+
+    const storedNarratives = localStorage.getItem('time2coin_narratives');
+    if (storedNarratives) {
+      try {
+        setNarratives(JSON.parse(storedNarratives));
+      } catch(e) {}
+    }
   }, []);
 
   const handleDirectAdminLogin = (e: React.FormEvent) => {
@@ -58,6 +84,23 @@ export default function AdminControlVault() {
     } else {
       setLoginError('Invalid Admin credentials.');
     }
+  };
+
+  const handleSaveNarratives = () => {
+    localStorage.setItem('time2coin_narratives', JSON.stringify(narratives));
+    localStorage.setItem('time2coin_active_lang', activeLang);
+    setSavedSuccess(true);
+    setTimeout(() => setSavedSuccess(false), 2000);
+  };
+
+  const handleNarrativeChange = (key: string, lang: 'en' | 'ms', value: string) => {
+    setNarratives(prev => ({
+      ...prev,
+      [key]: {
+        ...prev[key],
+        [lang]: value
+      }
+    }));
   };
 
   const handleApproveApplicant = (email: string) => {
@@ -170,7 +213,7 @@ export default function AdminControlVault() {
           </div>
 
           <div className="flex bg-slate-900 border border-slate-800 p-1 rounded-2xl">
-            {.map((tier) => (
+            {TIERS_LIST.map((tier) => (
               <button
                 key={tier}
                 onClick={() => setSelectedTier(tier as any)}
@@ -184,6 +227,81 @@ export default function AdminControlVault() {
       </header>
 
       <main className="max-w-7xl mx-auto space-y-6">
+        {/* DYNAMIC NARRATIVE & DUAL-LANGUAGE EDITOR */}
+        <section className="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 space-y-5 shadow-xl">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-800 pb-4">
+            <div>
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <Globe className="w-5 h-5 text-cyan-400" /> Dynamic Narrative & Dual-Language Manager
+              </h2>
+              <p className="text-xs text-slate-400">Edit app headers, menus, and landing copy dynamically without modifying source code.</p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="flex bg-slate-950 border border-slate-800 p-1 rounded-xl text-xs">
+                <button
+                  onClick={() => setActiveLang('en')}
+                  className={`px-3 py-1 rounded-lg font-bold transition ${activeLang === 'en' ? 'bg-cyan-600 text-white' : 'text-slate-400'}`}
+                >
+                  English (EN)
+                </button>
+                <button
+                  onClick={() => setActiveLang('ms')}
+                  className={`px-3 py-1 rounded-lg font-bold transition ${activeLang === 'ms' ? 'bg-cyan-600 text-white' : 'text-slate-400'}`}
+                >
+                  Bahasa Melayu (MS)
+                </button>
+              </div>
+
+              <button
+                onClick={handleSaveNarratives}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition flex items-center gap-1.5 shadow-md"
+              >
+                <Save className="w-4 h-4" /> Save Changes
+              </button>
+            </div>
+          </div>
+
+          {savedSuccess && (
+            <div className="p-3 bg-emerald-950/80 border border-emerald-800 text-emerald-200 rounded-xl text-xs flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>Static narrative and language settings updated successfully across all app pages!</span>
+            </div>
+          )}
+
+          <div className="space-y-4">
+            {Object.keys(narratives).map((key) => (
+              <div key={key} className="bg-slate-950 border border-slate-800 p-4 rounded-2xl space-y-2">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-mono text-cyan-400 font-bold">{key}</span>
+                  <span className="text-[10px] text-slate-500 uppercase">Field Key</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-semibold text-slate-400 mb-1">English Text</label>
+                    <input
+                      type="text"
+                      value={narratives[key]?.en || ''}
+                      onChange={(e) => handleNarrativeChange(key, 'en', e.target.value)}
+                      className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-semibold text-slate-400 mb-1">Bahasa Melayu Translation</label>
+                    <input
+                      type="text"
+                      value={narratives[key]?.ms || ''}
+                      onChange={(e) => handleNarrativeChange(key, 'ms', e.target.value)}
+                      className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* TIER APPROVAL QUEUE */}
         <section className="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 space-y-4 shadow-xl">
           <div className="flex justify-between items-center border-b border-slate-800 pb-3">
