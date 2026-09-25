@@ -5,7 +5,7 @@ import {
   Clock, ShieldCheck, HeartHandshake, Award, QrCode, Star, Lock, 
   CheckCircle2, AlertCircle, Sparkles, ArrowRight, User, Check, 
   RefreshCw, Sliders, ChevronRight, Utensils, Wifi, Building2, 
-  SlidersHorizontal, Download, FileText, Users, HelpCircle, LogIn, LogOut, Menu, X
+  SlidersHorizontal, Download, FileText, Users, HelpCircle, LogIn, LogOut, Menu, X, MessageSquare, Quote
 } from 'lucide-react';
 
 type TransactionStatus = 'REQUESTED' | 'ESCROW_LOCKED' | 'SERVICE_DELIVERED' | 'VERIFIED_AND_PAID' | 'RATED';
@@ -127,6 +127,30 @@ export default function Time2CoinMainApp() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [reviewSubmitted, setReviewSubmitted] = useState<boolean>(false);
 
+  const testimonials = [
+    {
+      name: 'Marcus Vance',
+      role: 'Local Bike Mechanic & Member',
+      quote: 'I fixed three bicycle chains in my neighborhood and earned 180 Time Coins. I used those coins to get artisan meals for my family from Green Garden Bistro without spending a dime of cash.',
+      rating: 5,
+      badge: 'Skilled & Punctual'
+    },
+    {
+      name: 'Dr. Aris Thorne',
+      role: 'Community Caregiver',
+      quote: 'The 4-digit escrow PIN system makes every transaction feel completely safe. I provided elder companion care for 2 hours and released funds instantly upon service completion.',
+      rating: 5,
+      badge: 'Trusted Provider'
+    },
+    {
+      name: 'Elena Rostova',
+      role: 'Organic Gardening Helper',
+      quote: 'Equal time value gives everyone dignity. Whether it is tutoring or gardening, 1 hour equals 1 hour. It has transformed our local neighbor connections!',
+      rating: 5,
+      badge: 'Top Community Member'
+    }
+  ];
+
   const computeFeature5 = (grossMins: number): Feature5Split => {
     const netProviderMinutes = Math.floor(grossMins * 0.95);
     const totalReserve = grossMins - netProviderMinutes;
@@ -201,7 +225,7 @@ export default function Time2CoinMainApp() {
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 font-sans pb-16 overflow-x-hidden w-full">
-      {/* GLOBAL HEADER */}
+      {/* HEADER */}
       <header className="border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-50 w-full">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-2 w-full">
           <div className="flex items-center gap-2.5 min-w-0">
@@ -216,7 +240,6 @@ export default function Time2CoinMainApp() {
             </div>
           </div>
 
-          {/* DESKTOP MENU LINKS */}
           <div className="hidden md:flex items-center gap-2 shrink-0">
             <a href="/" className="px-3 py-1.5 bg-cyan-950 border border-cyan-800 text-cyan-300 rounded-lg text-xs font-semibold hover:bg-cyan-900 transition">
               Home
@@ -254,7 +277,6 @@ export default function Time2CoinMainApp() {
               </a>
             )}
 
-            {/* BALANCE PILL (SHOW ONLY WHEN LOGGED IN) */}
             {currentUser && (
               <div className="bg-slate-900 border border-slate-800 rounded-full px-3 py-1 flex items-center gap-1.5 ml-1">
                 <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
@@ -263,7 +285,6 @@ export default function Time2CoinMainApp() {
             )}
           </div>
 
-          {/* MOBILE MENU TOGGLE BUTTON */}
           <div className="flex md:hidden items-center gap-2">
             {currentUser && (
               <div className="bg-slate-900 border border-slate-800 rounded-full px-2.5 py-1 flex items-center gap-1">
@@ -280,7 +301,6 @@ export default function Time2CoinMainApp() {
           </div>
         </div>
 
-        {/* MOBILE MENU DROPDOWN */}
         {mobileMenuOpen && (
           <div className="md:hidden bg-slate-950 border-b border-slate-800 px-4 py-3 space-y-2 text-xs">
             <a href="/" className="block py-2 text-cyan-300 font-semibold border-b border-slate-900">Home</a>
@@ -341,18 +361,9 @@ export default function Time2CoinMainApp() {
           </a>
         </aside>
 
-        {/* MOBILE TABS HEADER */}
-        <div className="lg:hidden flex overflow-x-auto gap-2 pb-2 border-b border-slate-800 w-full text-xs">
-          <button onClick={() => setActiveTab('dashboard')} className={`px-3 py-2 rounded-xl font-semibold whitespace-nowrap ${activeTab === 'dashboard' ? 'bg-cyan-600 text-white' : 'bg-slate-950 text-slate-400'}`}>Dashboard</button>
-          <button onClick={() => setActiveTab('services')} className={`px-3 py-2 rounded-xl font-semibold whitespace-nowrap ${activeTab === 'services' ? 'bg-cyan-600 text-white' : 'bg-slate-950 text-slate-400'}`}>Services</button>
-          <button onClick={() => setActiveTab('escrow')} className={`px-3 py-2 rounded-xl font-semibold whitespace-nowrap ${activeTab === 'escrow' ? 'bg-cyan-600 text-white' : 'bg-slate-950 text-slate-400'}`}>Escrow</button>
-          <button onClick={() => setActiveTab('food')} className={`px-3 py-2 rounded-xl font-semibold whitespace-nowrap ${activeTab === 'food' ? 'bg-cyan-600 text-white' : 'bg-slate-950 text-slate-400'}`}>Food Rescue</button>
-          <button onClick={() => setActiveTab('mesh')} className={`px-3 py-2 rounded-xl font-semibold whitespace-nowrap ${activeTab === 'mesh' ? 'bg-cyan-600 text-white' : 'bg-slate-950 text-slate-400'}`}>BLE Mesh</button>
-        </div>
-
         {/* MAIN CONTENT AREA */}
         <main className="flex-1 space-y-6 min-w-0 w-full">
-          {/* HERO MISSION BANNER */}
+          {/* HERO BANNER */}
           <section className="bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl relative overflow-hidden w-full">
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-2 bg-cyan-950/80 border border-cyan-800/60 px-3 py-1 rounded-full text-xs font-bold text-cyan-300 mb-3">
@@ -446,58 +457,96 @@ export default function Time2CoinMainApp() {
             </div>
           )}
 
-          {/* TAB 2: SERVICE DIRECTORY */}
+          {/* TAB 2: SERVICE DIRECTORY + COMMUNITY TESTIMONIALS */}
           {activeTab === 'services' && (
-            <div className="space-y-4 w-full">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h3 className="text-base font-bold text-white">Community Service Directory</h3>
-                <div className="flex flex-wrap gap-1.5">
-                  {['All', 'Mechanical', 'Caregiving', 'Gardening', 'Food Rescue'].map((cat) => (
-                    <button key={cat} onClick={() => setSelectedCategory(cat)} className={`px-3 py-1 rounded-full text-xs font-semibold transition ${selectedCategory === cat ? 'bg-cyan-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-slate-200'}`}>
-                      {cat}
-                    </button>
+            <div className="space-y-8 w-full">
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h3 className="text-base font-bold text-white">Community Service Directory</h3>
+                  <div className="flex flex-wrap gap-1.5">
+                    {['All', 'Mechanical', 'Caregiving', 'Gardening', 'Food Rescue'].map((cat) => (
+                      <button key={cat} onClick={() => setSelectedCategory(cat)} className={`px-3 py-1 rounded-full text-xs font-semibold transition ${selectedCategory === cat ? 'bg-cyan-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-slate-200'}`}>
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                  {filteredServices.map((service) => (
+                    <div key={service.id} className="bg-slate-950 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-4 hover:border-slate-700 transition flex flex-col justify-between w-full">
+                      <div>
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="text-[10px] font-semibold text-cyan-400 bg-cyan-950 px-2 py-0.5 rounded-full border border-cyan-800/50">
+                            {service.category}
+                          </span>
+                          <div className="text-right">
+                            <span className="text-base sm:text-lg font-black text-white">{service.estimatedMinutes}</span>
+                            <span className="text-xs text-slate-400 ml-1">Coins</span>
+                          </div>
+                        </div>
+                        <h3 className="font-bold text-slate-100 text-sm sm:text-base">{service.title}</h3>
+                        <p className="text-xs text-slate-400 leading-relaxed mt-2">{service.description}</p>
+                      </div>
+
+                      <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
+                        <div>
+                          <div className="text-xs text-slate-200 font-semibold">{service.providerName}</div>
+                          <div className="flex items-center gap-2 text-[10px] sm:text-xs">
+                            <span className="text-amber-400 font-bold">★ {service.providerRating}</span>
+                            <span className="text-slate-500">•</span>
+                            <span className="text-emerald-400 font-medium">{service.providerTrustScore}% Trust Score</span>
+                          </div>
+                        </div>
+
+                        <button onClick={() => handleLockEscrow(service)} className="px-3 py-1.5 sm:px-4 sm:py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-xs rounded-xl transition flex items-center gap-1">
+                          <Lock className="w-3.5 h-3.5" /> Book Job
+                        </button>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-                {filteredServices.map((service) => (
-                  <div key={service.id} className="bg-slate-950 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-4 hover:border-slate-700 transition flex flex-col justify-between w-full">
-                    <div>
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="text-[10px] font-semibold text-cyan-400 bg-cyan-950 px-2 py-0.5 rounded-full border border-cyan-800/50">
-                          {service.category}
-                        </span>
-                        <div className="text-right">
-                          <span className="text-base sm:text-lg font-black text-white">{service.estimatedMinutes}</span>
-                          <span className="text-xs text-slate-400 ml-1">Coins</span>
-                        </div>
-                      </div>
-                      <h3 className="font-bold text-slate-100 text-sm sm:text-base">{service.title}</h3>
-                      <p className="text-xs text-slate-400 leading-relaxed mt-2">{service.description}</p>
-                    </div>
-
-                    <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
-                      <div>
-                        <div className="text-xs text-slate-200 font-semibold">{service.providerName}</div>
-                        <div className="flex items-center gap-2 text-[10px] sm:text-xs">
-                          <span className="text-amber-400 font-bold">★ {service.providerRating}</span>
-                          <span className="text-slate-500">•</span>
-                          <span className="text-emerald-400 font-medium">{service.providerTrustScore}% Trust Score</span>
-                        </div>
-                      </div>
-
-                      <button onClick={() => handleLockEscrow(service)} className="px-3 py-1.5 sm:px-4 sm:py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-xs rounded-xl transition flex items-center gap-1">
-                        <Lock className="w-3.5 h-3.5" /> Book Job
-                      </button>
-                    </div>
+              {/* COMMUNITY STORIES & TESTIMONIALS SECTION */}
+              <section className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-6 shadow-2xl">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                  <div>
+                    <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider">Verified Social Proof</span>
+                    <h3 className="text-lg font-extrabold text-white mt-1 flex items-center gap-2">
+                      <MessageSquare className="w-5 h-5 text-cyan-400" /> Member Stories & Testimonials
+                    </h3>
                   </div>
-                ))}
-              </div>
+                  <span className="text-xs font-bold bg-cyan-950 text-cyan-300 border border-cyan-800 px-3 py-1 rounded-full">
+                    ★ 4.98 Community Trust Avg
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {testimonials.map((t, idx) => (
+                    <div key={idx} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between space-y-4">
+                      <div className="space-y-3">
+                        <Quote className="w-6 h-6 text-cyan-500/40" />
+                        <p className="text-xs text-slate-300 leading-relaxed italic">"{t.quote}"</p>
+                      </div>
+
+                      <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                        <div>
+                          <h4 className="font-bold text-white text-xs">{t.name}</h4>
+                          <span className="text-[10px] text-slate-400 block">{t.role}</span>
+                        </div>
+                        <span className="text-[10px] font-semibold bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded-full">
+                          {t.badge}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
             </div>
           )}
 
-          {/* TAB 3: ESCROW MACHINE & PIN */}
+          {/* OTHER TABS */}
           {activeTab === 'escrow' && activeJob && (
             <div className="bg-slate-950 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-6 w-full">
               <div className="flex items-center justify-between border-b border-slate-800 pb-4">
@@ -567,7 +616,6 @@ export default function Time2CoinMainApp() {
             </div>
           )}
 
-          {/* TAB 4: FOOD RESCUE */}
           {activeTab === 'food' && (
             <div className="space-y-4 w-full">
               <div className="bg-amber-950/40 border border-amber-800/60 rounded-2xl p-4 flex items-center gap-3">
@@ -605,7 +653,6 @@ export default function Time2CoinMainApp() {
             </div>
           )}
 
-          {/* TAB 5: BLE MESH QUEUE */}
           {activeTab === 'mesh' && (
             <div className="bg-slate-950 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 w-full">
               <div className="flex items-center gap-3">
@@ -633,7 +680,6 @@ export default function Time2CoinMainApp() {
             </div>
           )}
 
-          {/* TAB 6: REVIEW */}
           {activeTab === 'review' && activeJob && (
             <div className="bg-slate-950 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl max-w-lg mx-auto w-full">
               <h2 className="text-base sm:text-lg font-bold text-white mb-1">Double-Blind Service Review</h2>
@@ -643,7 +689,7 @@ export default function Time2CoinMainApp() {
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-2">Rating</label>
                   <div className="flex gap-2">
-                    {[1, 2, 3, 4, 5].map((star) => (
+                    {.map((star) => (
                       <button key={star} type="button" onClick={() => setReviewRating(star)} className={`p-2 rounded-xl border text-xs sm:text-sm font-bold transition flex-1 ${reviewRating >= star ? 'bg-amber-500/20 border-amber-500/50 text-amber-300' : 'bg-slate-900 border-slate-800 text-slate-500'}`}>
                         ★ {star}
                       </button>
