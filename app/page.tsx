@@ -5,7 +5,7 @@ import {
   Clock, ShieldCheck, HeartHandshake, Award, QrCode, Star, Lock, 
   CheckCircle2, AlertCircle, Sparkles, ArrowRight, User, Check, 
   RefreshCw, Sliders, ChevronRight, Utensils, Wifi, Building2, 
-  SlidersHorizontal, Download, FileText, Users, HelpCircle, LogIn, LogOut, Menu, X, MessageSquare, Quote
+  SlidersHorizontal, Download, FileText, Users, HelpCircle, LogIn, LogOut, Menu, X, MessageSquare, Quote, Globe
 } from 'lucide-react';
 
 type TransactionStatus = 'REQUESTED' | 'ESCROW_LOCKED' | 'SERVICE_DELIVERED' | 'VERIFIED_AND_PAID' | 'RATED';
@@ -49,6 +49,10 @@ export default function Time2CoinMainApp() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Dynamic Narrative / Multi-Language dictionary
+  const [langDict, setLangDict] = useState<Record<string, { en: string; ms: string }>>({});
+  const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
+
   useEffect(() => {
     const saved = localStorage.getItem('time2coin_user');
     if (saved) {
@@ -56,7 +60,27 @@ export default function Time2CoinMainApp() {
         setCurrentUser(JSON.parse(saved));
       } catch (e) {}
     }
+
+    const storedNarratives = localStorage.getItem('time2coin_narratives');
+    if (storedNarratives) {
+      try {
+        setLangDict(JSON.parse(storedNarratives));
+      } catch(e) {}
+    }
+
+    const savedLang = localStorage.getItem('time2coin_active_lang');
+    if (savedLang === 'en' || savedLang === 'ms') {
+      setCurrentLang(savedLang);
+    }
   }, []);
+
+  // Helper function to resolve dynamic narrative text with fallback
+  const t = (key: string, defaultText: string) => {
+    if (langDict[key] && langDict[key][currentLang]) {
+      return langDict[key][currentLang];
+    }
+    return defaultText;
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('time2coin_user');
@@ -244,16 +268,16 @@ export default function Time2CoinMainApp() {
 
           <div className="hidden md:flex items-center gap-2 shrink-0">
             <a href="/" className="px-3 py-1.5 bg-cyan-950 border border-cyan-800 text-cyan-300 rounded-lg text-xs font-semibold hover:bg-cyan-900 transition">
-              Home
+              {t('menu.home', 'Home')}
             </a>
             <a href="/merchant" className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-semibold transition flex items-center gap-1">
-              <Utensils className="w-3.5 h-3.5 text-amber-400" /> Merchant
+              <Utensils className="w-3.5 h-3.5 text-amber-400" /> {t('menu.merchant', 'Merchant')}
             </a>
             <a href="/corporate" className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-semibold transition flex items-center gap-1">
-              <Building2 className="w-3.5 h-3.5 text-blue-400" /> Corporate
+              <Building2 className="w-3.5 h-3.5 text-blue-400" /> {t('menu.corporate', 'Corporate')}
             </a>
             <a href="/terms" className="px-3 py-1.5 bg-slate-900 border border-slate-800 text-slate-300 rounded-lg text-xs font-semibold hover:bg-slate-800 transition">
-              Vision & Mission
+              {t('menu.vision', 'Vision & Mission')}
             </a>
 
             {currentUser ? (
@@ -275,7 +299,7 @@ export default function Time2CoinMainApp() {
                 href="/auth" 
                 className="px-3.5 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-cyan-600/20"
               >
-                <LogIn className="w-3.5 h-3.5" /> Sign In / Sign Out
+                <LogIn className="w-3.5 h-3.5" /> {t('menu.signin', 'Sign In / Sign Out')}
               </a>
             )}
 
@@ -305,10 +329,10 @@ export default function Time2CoinMainApp() {
 
         {mobileMenuOpen && (
           <div className="md:hidden bg-slate-950 border-b border-slate-800 px-4 py-3 space-y-2 text-xs">
-            <a href="/" className="block py-2 text-cyan-300 font-semibold border-b border-slate-900">Home</a>
-            <a href="/merchant" className="block py-2 text-slate-300 hover:text-white border-b border-slate-900">Merchant Portal</a>
-            <a href="/corporate" className="block py-2 text-slate-300 hover:text-white border-b border-slate-900">Corporate Portal</a>
-            <a href="/terms" className="block py-2 text-slate-300 hover:text-white border-b border-slate-900">Vision & Mission</a>
+            <a href="/" className="block py-2 text-cyan-300 font-semibold border-b border-slate-900">{t('menu.home', 'Home')}</a>
+            <a href="/merchant" className="block py-2 text-slate-300 hover:text-white border-b border-slate-900">{t('menu.merchant', 'Merchant Portal')}</a>
+            <a href="/corporate" className="block py-2 text-slate-300 hover:text-white border-b border-slate-900">{t('menu.corporate', 'Corporate Portal')}</a>
+            <a href="/terms" className="block py-2 text-slate-300 hover:text-white border-b border-slate-900">{t('menu.vision', 'Vision & Mission')}</a>
             {currentUser ? (
               <div className="pt-2 flex justify-between items-center">
                 <div>
@@ -321,7 +345,7 @@ export default function Time2CoinMainApp() {
               </div>
             ) : (
               <a href="/auth" className="block w-full text-center py-2 bg-cyan-600 text-white font-bold rounded-xl mt-2">
-                Sign In / Sign Out
+                {t('menu.signin', 'Sign In / Sign Out')}
               </a>
             )}
           </div>
@@ -372,23 +396,23 @@ export default function Time2CoinMainApp() {
                 <Sparkles className="w-3.5 h-3.5 text-cyan-400" /> Blue Ocean Social Enterprise
               </div>
               <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight mb-2">
-                Replacing Cash Friction with Universal Time Equity
+                {t('hero.title', 'Replacing Cash Friction with Universal Time Equity')}
               </h2>
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-4">
-                <strong>time2coin</strong> values every human hour equally (1 Hour = 1 Hour). Earn time credits through bicycle repair, elder care, or skill sharing—and spend those same coins on local restaurant surplus food or mutual aid care without cash.
+                {t('hero.subtitle', 'time2coin values every human hour equally (1 Hour = 1 Hour). Earn time credits through bicycle repair, elder care, or skill sharing—and spend those same coins on local restaurant surplus food or mutual aid care without cash.')}
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center text-xs">
                 <div className="bg-slate-900/90 border border-slate-800 p-2.5 rounded-xl">
-                  <span className="font-bold text-emerald-400 block">95% Provider Pay</span>
+                  <span className="font-bold text-emerald-400 block">{t('badge.providerPay', '95% Provider Pay')}</span>
                   <span className="text-slate-400 text-[10px]">Zero Cash Transaction Fees</span>
                 </div>
                 <div className="bg-slate-900/90 border border-slate-800 p-2.5 rounded-xl">
-                  <span className="font-bold text-cyan-400 block">4% Mutual Aid</span>
+                  <span className="font-bold text-cyan-400 block">{t('badge.mutualAid', '4% Mutual Aid')}</span>
                   <span className="text-slate-400 text-[10px]">Community Safety Net</span>
                 </div>
                 <div className="bg-slate-900/90 border border-slate-800 p-2.5 rounded-xl">
-                  <span className="font-bold text-blue-400 block">1% Platform Vault</span>
+                  <span className="font-bold text-blue-400 block">{t('badge.platformVault', '1% Platform Vault')}</span>
                   <span className="text-slate-400 text-[10px]">Sustains Open-Source Code</span>
                 </div>
               </div>
