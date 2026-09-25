@@ -5,12 +5,13 @@ import {
   Clock, ShieldCheck, HeartHandshake, Award, QrCode, Star, Lock, 
   CheckCircle2, AlertCircle, Sparkles, ArrowRight, User, Check, 
   RefreshCw, Sliders, ChevronRight, Utensils, Wifi, Building2, 
-  SlidersHorizontal, Download, FileText, Users, HelpCircle, LogIn, LogOut, MessageSquare, Quote, Globe, Plus, Store, LayoutDashboard, Send
+  SlidersHorizontal, Download, FileText, Users, HelpCircle, LogIn, LogOut, 
+  MessageSquare, Quote, Globe, Plus, Store, LayoutDashboard, Send, TrendingUp, Sparkle
 } from 'lucide-react';
 
 type TransactionStatus = 'REQUESTED' | 'ESCROW_LOCKED' | 'SERVICE_DELIVERED' | 'VERIFIED_AND_PAID' | 'RATED';
 
-const RATING_STARS = [1-5] as const;
+const RATING_STARS = [1, 2, 3, 4, 5] as const;
 
 interface ServiceItem {
   id: string;
@@ -52,7 +53,7 @@ export default function Time2CoinMainApp() {
   const [langDict, setLangDict] = useState<Record<string, { en: string; ms: string }>>({});
   const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
 
-  // New Service Post Form State
+  // Service Post Form State
   const [postTitle, setPostTitle] = useState('');
   const [postCategory, setPostCategory] = useState<'Mechanical' | 'Caregiving' | 'Tutoring' | 'Gardening' | 'Food Rescue'>('Mechanical');
   const [postMinutes, setPostMinutes] = useState('60');
@@ -183,6 +184,12 @@ export default function Time2CoinMainApp() {
     }
   ];
 
+  const liveActivityFeed = [
+    { user: 'Sarah J.', action: 'completed Bicycle Brake Repair for', value: '60 Time Coins', time: '2 mins ago' },
+    { user: 'Green Garden Bistro', action: 'rescued 4 Surplus Meals for', value: '180 Time Coins', time: '8 mins ago' },
+    { user: 'David C.', action: 'earned 90 Time Coins in Gardening for', value: 'Elder Care Pass', time: '14 mins ago' }
+  ];
+
   const computeFeature5 = (grossMins: number): Feature5Split => {
     const netProviderMinutes = Math.floor(grossMins * 0.95);
     const totalReserve = grossMins - netProviderMinutes;
@@ -286,38 +293,53 @@ export default function Time2CoinMainApp() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-24 lg:pb-12 overflow-x-hidden w-full">
-      {/* TOP HEADER (Simplified on mobile like Bolt prototype) */}
+      {/* TOP NAVIGATION HEADER WITH OFFICIAL DESIGNER LOGO */}
       <header className="border-b border-slate-800 bg-slate-950/95 backdrop-blur sticky top-0 z-40 w-full">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-2 w-full">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="bg-gradient-to-tr from-cyan-500 to-blue-600 p-2 rounded-xl shadow-lg shadow-cyan-500/20 shrink-0">
-              <Clock className="w-5 h-5 text-white" />
+          {/* LOGO & BRANDING */}
+          <a href="/" className="flex items-center gap-3 min-w-0 group">
+            <div className="p-1 bg-slate-900 border border-slate-800 rounded-xl group-hover:border-cyan-500/50 transition">
+              <img 
+                src="/Designer.png" 
+                alt="time2coin Logo" 
+                className="w-8 h-8 object-contain rounded-lg"
+                onError={(e) => {
+                  // Fallback icon if image path is loading
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
             </div>
             <div className="min-w-0">
-              <h1 className="font-bold text-lg sm:text-xl tracking-tight bg-gradient-to-r from-white via-slate-200 to-cyan-400 bg-clip-text text-transparent truncate">
+              <h1 className="font-extrabold text-lg sm:text-xl tracking-tight bg-gradient-to-r from-white via-slate-200 to-cyan-400 bg-clip-text text-transparent truncate">
                 time2coin
               </h1>
               <span className="text-[10px] sm:text-xs text-cyan-400/90 font-semibold hidden sm:inline-block">1 Hour = 1 Hour Universal Time Equity</span>
             </div>
-          </div>
+          </a>
 
-          {/* DESKTOP NAV LINKS */}
-          <div className="hidden lg:flex items-center gap-2 shrink-0">
-            <a href="/" className="px-3 py-1.5 bg-cyan-950 border border-cyan-800 text-cyan-300 rounded-lg text-xs font-semibold hover:bg-cyan-900 transition">
+          {/* DESKTOP TOP NAV LINKS */}
+          <div className="hidden lg:flex items-center gap-1.5 shrink-0">
+            <button onClick={() => setActiveTab('dashboard')} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${activeTab === 'dashboard' ? 'bg-cyan-950 border border-cyan-800 text-cyan-300' : 'text-slate-300 hover:bg-slate-900'}`}>
               {t('menu.home', 'Home')}
+            </button>
+            <a href="#how-it-works" className="px-3 py-1.5 text-slate-300 hover:text-white rounded-lg text-xs font-semibold transition">
+              How It Works
             </a>
-            <a href="/merchant" className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-semibold transition flex items-center gap-1">
-              <Utensils className="w-3.5 h-3.5 text-amber-400" /> {t('menu.merchant', 'Merchant')}
+            <button onClick={() => setActiveTab('services')} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${activeTab === 'services' ? 'bg-cyan-950 border border-cyan-800 text-cyan-300' : 'text-slate-300 hover:bg-slate-900'}`}>
+              Browse
+            </button>
+            <a href="#categories" className="px-3 py-1.5 text-slate-300 hover:text-white rounded-lg text-xs font-semibold transition">
+              Categories
             </a>
-            <a href="/corporate" className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-semibold transition flex items-center gap-1">
+            <a href="/merchant" className="px-3 py-1.5 text-slate-300 hover:text-amber-400 rounded-lg text-xs font-semibold transition flex items-center gap-1">
+              <Utensils className="w-3.5 h-3.5 text-amber-400" /> {t('menu.merchant', 'Food Rescue')}
+            </a>
+            <a href="/corporate" className="px-3 py-1.5 text-slate-300 hover:text-blue-400 rounded-lg text-xs font-semibold transition flex items-center gap-1">
               <Building2 className="w-3.5 h-3.5 text-blue-400" /> {t('menu.corporate', 'Corporate')}
-            </a>
-            <a href="/terms" className="px-3 py-1.5 bg-slate-900 border border-slate-800 text-slate-300 rounded-lg text-xs font-semibold hover:bg-slate-800 transition">
-              {t('menu.vision', 'Vision & Mission')}
             </a>
 
             {currentUser ? (
-              <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1 rounded-xl">
+              <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1 rounded-xl ml-2">
                 <div className="text-right">
                   <span className="text-xs font-bold text-white block">{currentUser.name}</span>
                   <span className="text-[10px] text-cyan-400 block">{currentUser.role}</span>
@@ -333,7 +355,7 @@ export default function Time2CoinMainApp() {
             ) : (
               <a 
                 href="/auth" 
-                className="px-3.5 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-cyan-600/20"
+                className="ml-2 px-4 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-cyan-600/20"
               >
                 <LogIn className="w-3.5 h-3.5" /> {t('menu.signin', 'Sign In')}
               </a>
@@ -347,7 +369,7 @@ export default function Time2CoinMainApp() {
             )}
           </div>
 
-          {/* MOBILE HEADER UTILITIES (Credit Badge & Quick Auth) */}
+          {/* MOBILE HEADER UTILITIES */}
           <div className="flex lg:hidden items-center gap-2">
             <div className="bg-cyan-950/80 border border-cyan-800/80 rounded-full px-2.5 py-1 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
@@ -365,7 +387,7 @@ export default function Time2CoinMainApp() {
             ) : (
               <a 
                 href="/auth" 
-                className="px-2.5 py-1.5 bg-cyan-600 text-white rounded-xl text-xs font-bold transition"
+                className="px-3 py-1.5 bg-cyan-600 text-white rounded-xl text-xs font-bold transition"
               >
                 Sign In
               </a>
@@ -374,7 +396,7 @@ export default function Time2CoinMainApp() {
         </div>
       </header>
 
-      {/* BODY CONTENT */}
+      {/* BODY CONTENT CONTAINER */}
       <div className="max-w-7xl mx-auto px-4 pt-6 flex flex-col lg:flex-row gap-6 w-full">
         {/* DESKTOP SIDEBAR */}
         <aside className="hidden lg:block w-64 bg-slate-950 border border-slate-800 rounded-3xl p-4 h-fit sticky top-20 space-y-2 shadow-xl shrink-0">
@@ -413,38 +435,186 @@ export default function Time2CoinMainApp() {
         </aside>
 
         {/* MAIN CONTENT AREA */}
-        <main className="flex-1 space-y-6 min-w-0 w-full">
-          {/* HERO BANNER */}
-          <section className="bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl relative overflow-hidden w-full">
-            <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 bg-cyan-950/80 border border-cyan-800/60 px-3 py-1 rounded-full text-xs font-bold text-cyan-300 mb-3">
+        <main className="flex-1 space-y-10 min-w-0 w-full">
+          {/* HERO BANNER & CONVERSION CALLOUT */}
+          <section className="bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden w-full space-y-6">
+            <div className="max-w-2xl space-y-4">
+              <div className="inline-flex items-center gap-2 bg-cyan-950/80 border border-cyan-800/60 px-3 py-1 rounded-full text-xs font-bold text-cyan-300">
                 <Sparkles className="w-3.5 h-3.5 text-cyan-400" /> Blue Ocean Social Enterprise
               </div>
-              <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight mb-2">
+              <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight leading-tight">
                 {t('hero.title', 'Replacing Cash Friction with Universal Time Equity')}
               </h2>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-4">
+              <p className="text-xs sm:text-base text-slate-300 leading-relaxed">
                 {t('hero.subtitle', 'time2coin values every human hour equally (1 Hour = 1 Hour). Earn time credits through bicycle repair, elder care, or skill sharing—and spend those same coins on local restaurant surplus food or mutual aid care without cash.')}
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center text-xs">
-                <div className="bg-slate-900/90 border border-slate-800 p-2.5 rounded-xl">
-                  <span className="font-bold text-emerald-400 block">{t('badge.providerPay', '95% Provider Pay')}</span>
-                  <span className="text-slate-400 text-[10px]">Zero Cash Transaction Fees</span>
-                </div>
-                <div className="bg-slate-900/90 border border-slate-800 p-2.5 rounded-xl">
-                  <span className="font-bold text-cyan-400 block">{t('badge.mutualAid', '4% Mutual Aid')}</span>
-                  <span className="text-slate-400 text-[10px]">Community Safety Net</span>
-                </div>
-                <div className="bg-slate-900/90 border border-slate-800 p-2.5 rounded-xl">
-                  <span className="font-bold text-blue-400 block">{t('badge.platformVault', '1% Platform Vault')}</span>
-                  <span className="text-slate-400 text-[10px]">Sustains Open-Source Code</span>
-                </div>
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                <a 
+                  href="/auth" 
+                  className="px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 text-white font-extrabold text-xs sm:text-sm rounded-2xl transition shadow-xl shadow-cyan-600/25 flex items-center gap-2"
+                >
+                  Join the Community <ArrowRight className="w-4 h-4" />
+                </a>
+                <button 
+                  onClick={() => setActiveTab('services')}
+                  className="px-5 py-3 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-bold text-xs sm:text-sm rounded-2xl transition"
+                >
+                  Browse Live Services
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center text-xs pt-4 border-t border-slate-800/80">
+              <div className="bg-slate-900/90 border border-slate-800 p-3 rounded-2xl">
+                <span className="font-bold text-emerald-400 block text-sm">{t('badge.providerPay', '95% Provider Pay')}</span>
+                <span className="text-slate-400 text-[11px]">Zero Cash Transaction Fees</span>
+              </div>
+              <div className="bg-slate-900/90 border border-slate-800 p-3 rounded-2xl">
+                <span className="font-bold text-cyan-400 block text-sm">{t('badge.mutualAid', '4% Mutual Aid')}</span>
+                <span className="text-slate-400 text-[11px]">Community Safety Net</span>
+              </div>
+              <div className="bg-slate-900/90 border border-slate-800 p-3 rounded-2xl">
+                <span className="font-bold text-blue-400 block text-sm">{t('badge.platformVault', '1% Platform Vault')}</span>
+                <span className="text-slate-400 text-[11px]">Sustains Open-Source Code</span>
               </div>
             </div>
           </section>
 
-          {/* TAB 1: DASHBOARD */}
+          {/* LIVE IMPACT STATISTICS BAR */}
+          <section className="bg-slate-950 border border-slate-800 rounded-3xl p-6 shadow-xl">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+              <div className="space-y-1">
+                <div className="text-2xl sm:text-3xl font-black text-cyan-400">250+</div>
+                <div className="text-xs text-slate-400 font-medium">Active Skill Offers</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-2xl sm:text-3xl font-black text-emerald-400">1,420+</div>
+                <div className="text-xs text-slate-400 font-medium">Hours Traded</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-2xl sm:text-3xl font-black text-amber-400">850+</div>
+                <div className="text-xs text-slate-400 font-medium">Surplus Meals Rescued</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-2xl sm:text-3xl font-black text-blue-400">4.98 ★</div>
+                <div className="text-xs text-slate-400 font-medium">Community Trust Rating</div>
+              </div>
+            </div>
+          </section>
+
+          {/* "HOW IT WORKS" 3-STEP EXPLANATION BOXES */}
+          <section id="how-it-works" className="space-y-4 scroll-mt-24">
+            <div className="text-center space-y-1">
+              <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider">Simple & Fair Economy</span>
+              <h3 className="text-xl font-extrabold text-white">How time2coin Works</h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-3 relative">
+                <div className="w-10 h-10 rounded-2xl bg-cyan-950 border border-cyan-800 flex items-center justify-center font-black text-cyan-400 text-lg">
+                  1
+                </div>
+                <h4 className="font-bold text-white text-base">Offer Your Skills</h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Fix a bicycle, teach guitar, or help an elder with grocery shopping. Every 1 hour you work earns you 60 Time Coins.
+                </p>
+              </div>
+
+              <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-3 relative">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-950 border border-emerald-800 flex items-center justify-center font-black text-emerald-400 text-lg">
+                  2
+                </div>
+                <h4 className="font-bold text-white text-base">Locked Escrow & 4-Digit PIN</h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Time coins remain locked in escrow until service delivery. Release payment safely using a 4-digit verification PIN.
+                </p>
+              </div>
+
+              <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-3 relative">
+                <div className="w-10 h-10 rounded-2xl bg-amber-950 border border-amber-800 flex items-center justify-center font-black text-amber-400 text-lg">
+                  3
+                </div>
+                <h4 className="font-bold text-white text-base">Redeem Anywhere</h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Spend your earned Time Coins on neighboring skills or redeem fresh surplus meals from local restaurant partners without cash.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* BROWSE BY CATEGORY SECTION */}
+          <section id="categories" className="space-y-4 scroll-mt-24">
+            <div className="flex justify-between items-center">
+              <div>
+                <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider">Explore Marketplace</span>
+                <h3 className="text-xl font-extrabold text-white mt-0.5">Browse by Category</h3>
+              </div>
+              <button onClick={() => setActiveTab('services')} className="text-xs font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-1">
+                View All <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              {[
+                { name: 'Mechanical', color: 'border-cyan-800 text-cyan-300 bg-cyan-950/50' },
+                { name: 'Caregiving', color: 'border-blue-800 text-blue-300 bg-blue-950/50' },
+                { name: 'Tutoring', color: 'border-purple-800 text-purple-300 bg-purple-950/50' },
+                { name: 'Gardening', color: 'border-emerald-800 text-emerald-300 bg-emerald-950/50' },
+                { name: 'Food Rescue', color: 'border-amber-800 text-amber-300 bg-amber-950/50' }
+              ].map((cat) => (
+                <button
+                  key={cat.name}
+                  onClick={() => {
+                    setSelectedCategory(cat.name);
+                    setActiveTab('services');
+                  }}
+                  className={`p-4 border rounded-2xl font-bold text-xs text-center transition hover:scale-105 ${cat.color}`}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* MID-PAGE CONVERSION BANNER (1st Join Reminder) */}
+          <section className="bg-gradient-to-r from-cyan-950 via-slate-900 to-blue-950 border border-cyan-800/60 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-2xl">
+            <div className="space-y-2 text-center sm:text-left">
+              <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider">No Cash Required</span>
+              <h3 className="text-xl sm:text-2xl font-extrabold text-white">Ready to exchange skills with neighbors?</h3>
+              <p className="text-xs text-slate-300">Join over 1,000+ local members trading labor and food credits today.</p>
+            </div>
+            <a
+              href="/auth"
+              className="px-6 py-3.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 text-white font-extrabold text-xs sm:text-sm rounded-2xl transition shadow-xl shrink-0"
+            >
+              Create Free Account
+            </a>
+          </section>
+
+          {/* "WHAT'S HAPPENING NOW" LIVE ACTIVITY FEED */}
+          <section className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-emerald-400" />
+              <h3 className="text-base font-bold text-white">What's Happening Now in the Community</h3>
+            </div>
+
+            <div className="space-y-3">
+              {liveActivityFeed.map((item, idx) => (
+                <div key={idx} className="bg-slate-900 border border-slate-800/80 rounded-2xl p-3.5 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                    <span className="text-slate-200 truncate">
+                      <strong>{item.user}</strong> {item.action} <span className="text-cyan-300 font-bold">{item.value}</span>
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-slate-500 shrink-0 ml-2">{item.time}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* TAB 1 & TAB 2 MAIN DYNAMIC CONTENT */}
           {activeTab === 'dashboard' && (
             <div className="space-y-6 w-full">
               <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl w-full">
@@ -508,7 +678,6 @@ export default function Time2CoinMainApp() {
             </div>
           )}
 
-          {/* TAB 2: SERVICE DIRECTORY + COMMUNITY TESTIMONIALS */}
           {activeTab === 'services' && (
             <div className="space-y-8 w-full">
               <div className="space-y-4">
@@ -558,44 +727,85 @@ export default function Time2CoinMainApp() {
                   ))}
                 </div>
               </div>
-
-              {/* COMMUNITY STORIES & TESTIMONIALS SECTION */}
-              <section className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-6 shadow-2xl">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-                  <div>
-                    <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider">Verified Social Proof</span>
-                    <h3 className="text-lg font-extrabold text-white mt-1 flex items-center gap-2">
-                      <MessageSquare className="w-5 h-5 text-cyan-400" /> Member Stories & Testimonials
-                    </h3>
-                  </div>
-                  <span className="text-xs font-bold bg-cyan-950 text-cyan-300 border border-cyan-800 px-3 py-1 rounded-full">
-                    ★ 4.98 Community Trust Avg
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {testimonials.map((t, idx) => (
-                    <div key={idx} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between space-y-4">
-                      <div className="space-y-3">
-                        <Quote className="w-6 h-6 text-cyan-500/40" />
-                        <p className="text-xs text-slate-300 leading-relaxed italic">"{t.quote}"</p>
-                      </div>
-
-                      <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
-                        <div>
-                          <h4 className="font-bold text-white text-xs">{t.name}</h4>
-                          <span className="text-[10px] text-slate-400 block">{t.role}</span>
-                        </div>
-                        <span className="text-[10px] font-semibold bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded-full">
-                          {t.badge}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
             </div>
           )}
+
+          {/* MERCHANT SURPLUS & FOOD RESCUE SHOWCASE */}
+          <section id="food" className="bg-slate-950 border border-amber-800/50 rounded-3xl p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Utensils className="w-7 h-7 text-amber-400 shrink-0" />
+                <div>
+                  <h3 className="text-base font-bold text-white">Merchant Surplus Food Rescue</h3>
+                  <p className="text-xs text-slate-300">Spend Time Coins earned anywhere in the community on fresh surplus meals from local restaurants.</p>
+                </div>
+              </div>
+              <a href="/merchant" className="text-xs font-bold text-amber-400 hover:text-amber-300 hidden sm:block">
+                Merchant Portal →
+              </a>
+            </div>
+
+            {services.filter(s => s.isMerchantSurplus).map((service) => (
+              <div key={service.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-3 w-full">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="text-[10px] font-bold text-amber-400 bg-amber-950 px-2 py-0.5 rounded-full border border-amber-800/50">
+                      Merchant Surplus
+                    </span>
+                    <h4 className="font-bold text-white text-sm sm:text-base mt-2">{service.title}</h4>
+                    <p className="text-xs text-slate-400 mt-1">{service.description}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xl sm:text-2xl font-black text-amber-300">{service.estimatedMinutes}</span>
+                    <span className="text-xs text-slate-400 block">Time Coins</span>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
+                  <span className="text-xs text-slate-300 font-semibold">{service.providerName}</span>
+                  <button onClick={() => handleLockEscrow(service)} className="px-3 py-1.5 sm:px-4 sm:py-2 bg-gradient-to-r from-amber-600 to-amber-500 text-white font-bold text-xs rounded-xl transition shadow-lg">
+                    Redeem Surplus Meal
+                  </button>
+                </div>
+              </div>
+            ))}
+          </section>
+
+          {/* VERIFIED COMMUNITY TESTIMONIALS SECTION */}
+          <section className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+              <div>
+                <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider">Verified Social Proof</span>
+                <h3 className="text-lg font-extrabold text-white mt-1 flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5 text-cyan-400" /> Member Stories & Testimonials
+                </h3>
+              </div>
+              <span className="text-xs font-bold bg-cyan-950 text-cyan-300 border border-cyan-800 px-3 py-1 rounded-full">
+                ★ 4.98 Community Trust Avg
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {testimonials.map((t, idx) => (
+                <div key={idx} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between space-y-4">
+                  <div className="space-y-3">
+                    <Quote className="w-6 h-6 text-cyan-500/40" />
+                    <p className="text-xs text-slate-300 leading-relaxed italic">"{t.quote}"</p>
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                    <div>
+                      <h4 className="font-bold text-white text-xs">{t.name}</h4>
+                      <span className="text-[10px] text-slate-400 block">{t.role}</span>
+                    </div>
+                    <span className="text-[10px] font-semibold bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded-full">
+                      {t.badge}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
 
           {/* TAB 3: POST NEW OFFER */}
           {activeTab === 'post' && (
@@ -678,7 +888,7 @@ export default function Time2CoinMainApp() {
             </div>
           )}
 
-          {/* OTHER TABS */}
+          {/* OTHER TABS (ESCROW, BLE MESH, REVIEWS) */}
           {activeTab === 'escrow' && activeJob && (
             <div className="bg-slate-950 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-6 w-full">
               <div className="flex items-center justify-between border-b border-slate-800 pb-4">
@@ -748,43 +958,6 @@ export default function Time2CoinMainApp() {
             </div>
           )}
 
-          {activeTab === 'food' && (
-            <div className="space-y-4 w-full">
-              <div className="bg-amber-950/40 border border-amber-800/60 rounded-2xl p-4 flex items-center gap-3">
-                <Utensils className="w-7 h-7 text-amber-400 shrink-0" />
-                <div>
-                  <h3 className="text-sm font-bold text-amber-300">Merchant Surplus Food Rescue</h3>
-                  <p className="text-xs text-slate-300">Spend Time Coins earned anywhere in the community on fresh chef-prepared surplus meals from local restaurants.</p>
-                </div>
-              </div>
-
-              {services.filter(s => s.isMerchantSurplus).map((service) => (
-                <div key={service.id} className="bg-slate-950 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-3 w-full">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <span className="text-[10px] font-bold text-amber-400 bg-amber-950 px-2 py-0.5 rounded-full border border-amber-800/50">
-                        Merchant Surplus
-                      </span>
-                      <h4 className="font-bold text-white text-sm sm:text-base mt-2">{service.title}</h4>
-                      <p className="text-xs text-slate-400 mt-1">{service.description}</p>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-xl sm:text-2xl font-black text-amber-300">{service.estimatedMinutes}</span>
-                      <span className="text-xs text-slate-400 block">Time Coins</span>
-                    </div>
-                  </div>
-
-                  <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
-                    <span className="text-xs text-slate-300 font-semibold">{service.providerName}</span>
-                    <button onClick={() => handleLockEscrow(service)} className="px-3 py-1.5 sm:px-4 sm:py-2 bg-gradient-to-r from-amber-600 to-amber-500 text-white font-bold text-xs rounded-xl transition shadow-lg">
-                      Redeem Surplus Meal
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
           {activeTab === 'mesh' && (
             <div className="bg-slate-950 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 w-full">
               <div className="flex items-center gap-3">
@@ -847,10 +1020,26 @@ export default function Time2CoinMainApp() {
             </div>
           )}
 
+          {/* CLOSING CALL-TO-ACTION (2nd Join Reminder) */}
+          <section className="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 border border-slate-800 rounded-3xl p-8 text-center space-y-4 shadow-2xl">
+            <h3 className="text-2xl font-black text-white">Ready to Start Trading Time?</h3>
+            <p className="text-xs sm:text-sm text-slate-300 max-w-lg mx-auto">
+              100% Free • Zero Cash Required • Earn credits through skills and redeem fresh surplus food.
+            </p>
+            <div className="pt-2">
+              <a
+                href="/auth"
+                className="inline-flex items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 text-white font-extrabold text-sm rounded-2xl transition shadow-xl"
+              >
+                Join Community Now <ArrowRight className="w-4 h-4" />
+              </a>
+            </div>
+          </section>
+
         </main>
       </div>
 
-      {/* MOBILE BOTTOM NAVIGATION BAR (Inspired by Bolt Prototype) */}
+      {/* MOBILE BOTTOM NAVIGATION BAR */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur border-t border-slate-800/80 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
         <div className="flex items-stretch justify-around px-2 pt-1.5 pb-2">
           {/* HOME */}
