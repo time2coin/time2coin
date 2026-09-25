@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Building2, ArrowLeft, HeartHandshake, ShieldCheck, LogIn, LogOut } from 'lucide-react';
+import { Building2, ArrowLeft, HeartHandshake, ShieldCheck, LogIn, LogOut, Award, Quote, CheckCircle2 } from 'lucide-react';
 
 export default function CorporateCSRPortal() {
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -19,6 +19,21 @@ export default function CorporateCSRPortal() {
     localStorage.removeItem('time2coin_user');
     setCurrentUser(null);
   };
+
+  const corporateTestimonials = [
+    {
+      company: 'Acme ESG Global Foundation',
+      author: 'Evelyn Reed, Corporate Impact Lead',
+      quote: 'Partnering with time2coin allowed us to sponsor local surplus food rescue while simultaneously generating verifiable community care hours. The pseudonymous audit reporting gives us 100% ESG compliance transparency.',
+      impact: '$50,000 Sponsored Pool'
+    },
+    {
+      company: 'Riverdale Tech Labs',
+      author: 'David Chen, CSR Director',
+      quote: 'Unlike traditional charities with high administrative overhead, every $1.00 micro-donation in time2coin directly unlocks 1 surplus meal rescued and 1 hour of volunteer labor.',
+      impact: '1,200 Meals Rescued'
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans p-6">
@@ -53,11 +68,46 @@ export default function CorporateCSRPortal() {
       </header>
 
       <main className="max-w-5xl mx-auto space-y-6">
+        {/* HERO MULTIPLIER BANNER */}
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl text-center space-y-4">
           <HeartHandshake className="w-12 h-12 text-blue-400 mx-auto" />
           <h2 className="text-xl font-bold text-white">$1.00 = 1 Surplus Meal Rescued + 1 Hour Community Care</h2>
           <p className="text-xs text-slate-400 max-w-xl mx-auto">Corporate CSR micro-donations directly fund merchant cash reimbursements while mobilizing local volunteer services with zero overhead leakage.</p>
         </div>
+
+        {/* CORPORATE & DONOR TESTIMONIALS */}
+        <section className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6 shadow-xl">
+          <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+            <div>
+              <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">Corporate Social Proof</span>
+              <h3 className="text-base font-bold text-white mt-0.5">ESG Sponsor & Donor Testimonials</h3>
+            </div>
+            <span className="text-xs font-bold bg-blue-950 text-blue-300 border border-blue-800 px-3 py-1 rounded-full">
+              Verified CSR Impact
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {corporateTestimonials.map((t, idx) => (
+              <div key={idx} className="bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
+                <div className="space-y-3">
+                  <Quote className="w-6 h-6 text-blue-500/40" />
+                  <p className="text-xs text-slate-300 leading-relaxed italic">"{t.quote}"</p>
+                </div>
+
+                <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
+                  <div>
+                    <h4 className="font-bold text-white text-xs">{t.company}</h4>
+                    <span className="text-[10px] text-slate-400 block">{t.author}</span>
+                  </div>
+                  <span className="text-[10px] font-bold bg-blue-950 text-blue-300 border border-blue-800 px-2.5 py-1 rounded-full">
+                    {t.impact}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
       </main>
     </div>
   );
