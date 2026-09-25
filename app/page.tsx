@@ -5,12 +5,12 @@ import {
   Clock, ShieldCheck, HeartHandshake, Award, QrCode, Star, Lock, 
   CheckCircle2, AlertCircle, Sparkles, ArrowRight, User, Check, 
   RefreshCw, Sliders, ChevronRight, Utensils, Wifi, Building2, 
-  SlidersHorizontal, Download, FileText, Users, HelpCircle, LogIn, LogOut, Menu, X, MessageSquare, Quote, Globe
+  SlidersHorizontal, Download, FileText, Users, HelpCircle, LogIn, LogOut, MessageSquare, Quote, Globe, Plus, Store, LayoutDashboard, Send
 } from 'lucide-react';
 
 type TransactionStatus = 'REQUESTED' | 'ESCROW_LOCKED' | 'SERVICE_DELIVERED' | 'VERIFIED_AND_PAID' | 'RATED';
 
-const RATING_STARS = [1, 2, 3, 4, 5] as const;
+const RATING_STARS = [1-5] as const;
 
 interface ServiceItem {
   id: string;
@@ -44,14 +44,20 @@ interface ActiveTransaction {
 
 export default function Time2CoinMainApp() {
   const [walletBalance, setWalletBalance] = useState<number>(120);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'services' | 'escrow' | 'food' | 'mesh' | 'review'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'services' | 'escrow' | 'food' | 'mesh' | 'review' | 'post'>('dashboard');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Dynamic Narrative / Multi-Language dictionary
   const [langDict, setLangDict] = useState<Record<string, { en: string; ms: string }>>({});
   const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
+
+  // New Service Post Form State
+  const [postTitle, setPostTitle] = useState('');
+  const [postCategory, setPostCategory] = useState<'Mechanical' | 'Caregiving' | 'Tutoring' | 'Gardening' | 'Food Rescue'>('Mechanical');
+  const [postMinutes, setPostMinutes] = useState('60');
+  const [postDescription, setPostDescription] = useState('');
+  const [postSuccess, setPostSuccess] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('time2coin_user');
@@ -87,7 +93,7 @@ export default function Time2CoinMainApp() {
     setCurrentUser(null);
   };
 
-  const [services] = useState<ServiceItem[]>([
+  const [services, setServices] = useState<ServiceItem[]>([
     {
       id: 'srv-1',
       providerName: 'Sarah Jenkins',
@@ -239,6 +245,35 @@ export default function Time2CoinMainApp() {
     }, 1800);
   };
 
+  const handleCreateOffer = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentUser) {
+      alert("Please Sign In first to post a service offer.");
+      window.location.href = '/auth';
+      return;
+    }
+
+    const newSrv: ServiceItem = {
+      id: `srv-${Date.now()}`,
+      providerName: currentUser.name || 'Community Member',
+      providerRating: 5.0,
+      providerTrustScore: 100,
+      title: postTitle,
+      category: postCategory,
+      estimatedMinutes: Number(postMinutes) || 60,
+      description: postDescription
+    };
+
+    setServices(prev => [newSrv, ...prev]);
+    setPostSuccess(true);
+    setTimeout(() => {
+      setPostSuccess(false);
+      setPostTitle('');
+      setPostDescription('');
+      setActiveTab('services');
+    }, 1500);
+  };
+
   const toggleTag = (tag: string) => {
     setSelectedTags(prev => 
       prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
@@ -250,9 +285,9 @@ export default function Time2CoinMainApp() {
     : services.filter(s => s.category === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 font-sans pb-16 overflow-x-hidden w-full">
-      {/* HEADER */}
-      <header className="border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-50 w-full">
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-24 lg:pb-12 overflow-x-hidden w-full">
+      {/* TOP HEADER (Simplified on mobile like Bolt prototype) */}
+      <header className="border-b border-slate-800 bg-slate-950/95 backdrop-blur sticky top-0 z-40 w-full">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-2 w-full">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="bg-gradient-to-tr from-cyan-500 to-blue-600 p-2 rounded-xl shadow-lg shadow-cyan-500/20 shrink-0">
@@ -266,7 +301,8 @@ export default function Time2CoinMainApp() {
             </div>
           </div>
 
-          <div className="hidden md:flex items-center gap-2 shrink-0">
+          {/* DESKTOP NAV LINKS */}
+          <div className="hidden lg:flex items-center gap-2 shrink-0">
             <a href="/" className="px-3 py-1.5 bg-cyan-950 border border-cyan-800 text-cyan-300 rounded-lg text-xs font-semibold hover:bg-cyan-900 transition">
               {t('menu.home', 'Home')}
             </a>
@@ -299,7 +335,7 @@ export default function Time2CoinMainApp() {
                 href="/auth" 
                 className="px-3.5 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-cyan-600/20"
               >
-                <LogIn className="w-3.5 h-3.5" /> {t('menu.signin', 'Sign In / Sign Out')}
+                <LogIn className="w-3.5 h-3.5" /> {t('menu.signin', 'Sign In')}
               </a>
             )}
 
@@ -311,45 +347,31 @@ export default function Time2CoinMainApp() {
             )}
           </div>
 
-          <div className="flex md:hidden items-center gap-2">
-            {currentUser && (
-              <div className="bg-slate-900 border border-slate-800 rounded-full px-2.5 py-1 flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-cyan-400" />
-                <span className="font-bold text-[11px] text-cyan-300">{walletBalance}m</span>
-              </div>
-            )}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 bg-slate-900 border border-slate-800 rounded-xl text-slate-200"
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          </div>
-        </div>
+          {/* MOBILE HEADER UTILITIES (Credit Badge & Quick Auth) */}
+          <div className="flex lg:hidden items-center gap-2">
+            <div className="bg-cyan-950/80 border border-cyan-800/80 rounded-full px-2.5 py-1 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+              <span className="font-extrabold text-xs text-cyan-300">{walletBalance}m</span>
+            </div>
 
-        {mobileMenuOpen && (
-          <div className="md:hidden bg-slate-950 border-b border-slate-800 px-4 py-3 space-y-2 text-xs">
-            <a href="/" className="block py-2 text-cyan-300 font-semibold border-b border-slate-900">{t('menu.home', 'Home')}</a>
-            <a href="/merchant" className="block py-2 text-slate-300 hover:text-white border-b border-slate-900">{t('menu.merchant', 'Merchant Portal')}</a>
-            <a href="/corporate" className="block py-2 text-slate-300 hover:text-white border-b border-slate-900">{t('menu.corporate', 'Corporate Portal')}</a>
-            <a href="/terms" className="block py-2 text-slate-300 hover:text-white border-b border-slate-900">{t('menu.vision', 'Vision & Mission')}</a>
             {currentUser ? (
-              <div className="pt-2 flex justify-between items-center">
-                <div>
-                  <span className="font-bold text-white block">{currentUser.name}</span>
-                  <span className="text-[10px] text-cyan-400">{currentUser.role}</span>
-                </div>
-                <button onClick={handleLogout} className="px-3 py-1.5 bg-rose-950 text-rose-300 border border-rose-800 rounded-lg font-bold flex items-center gap-1">
-                  <LogOut className="w-3.5 h-3.5" /> Logout
-                </button>
-              </div>
+              <button
+                onClick={handleLogout}
+                className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white"
+                aria-label="Sign out"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
             ) : (
-              <a href="/auth" className="block w-full text-center py-2 bg-cyan-600 text-white font-bold rounded-xl mt-2">
-                {t('menu.signin', 'Sign In / Sign Out')}
+              <a 
+                href="/auth" 
+                className="px-2.5 py-1.5 bg-cyan-600 text-white rounded-xl text-xs font-bold transition"
+              >
+                Sign In
               </a>
             )}
           </div>
-        )}
+        </div>
       </header>
 
       {/* BODY CONTENT */}
@@ -362,6 +384,9 @@ export default function Time2CoinMainApp() {
           </button>
           <button onClick={() => setActiveTab('services')} className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition ${activeTab === 'services' ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'}`}>
             <SlidersHorizontal className="w-4 h-4" /> Service Directory
+          </button>
+          <button onClick={() => setActiveTab('post')} className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition ${activeTab === 'post' ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'}`}>
+            <Plus className="w-4 h-4 text-cyan-400" /> Post New Offer
           </button>
           <button onClick={() => setActiveTab('escrow')} className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition ${activeTab === 'escrow' ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'}`}>
             <div className="flex items-center gap-3">
@@ -572,6 +597,87 @@ export default function Time2CoinMainApp() {
             </div>
           )}
 
+          {/* TAB 3: POST NEW OFFER */}
+          {activeTab === 'post' && (
+            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl max-w-xl mx-auto w-full space-y-5">
+              <div>
+                <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                  <Plus className="w-5 h-5 text-cyan-400" /> Post a Service or Skill Offer
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">Share your skills to earn Time Coins from community neighbors.</p>
+              </div>
+
+              {postSuccess && (
+                <div className="p-4 bg-emerald-950/80 border border-emerald-800 text-emerald-200 rounded-2xl text-xs flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                  <span>Service offer published successfully! Redirecting to community directory...</span>
+                </div>
+              )}
+
+              <form onSubmit={handleCreateOffer} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Service Title</label>
+                  <input
+                    type="text"
+                    required
+                    value={postTitle}
+                    onChange={(e) => setPostTitle(e.target.value)}
+                    placeholder="e.g. Guitar Lessons / Plumbing Repair"
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">Category</label>
+                    <select
+                      value={postCategory}
+                      onChange={(e) => setPostCategory(e.target.value as any)}
+                      className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500"
+                    >
+                      <option value="Mechanical">Mechanical</option>
+                      <option value="Caregiving">Caregiving</option>
+                      <option value="Tutoring">Tutoring</option>
+                      <option value="Gardening">Gardening</option>
+                      <option value="Food Rescue">Food Rescue</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">Time Coins (Minutes)</label>
+                    <input
+                      type="number"
+                      required
+                      value={postMinutes}
+                      onChange={(e) => setPostMinutes(e.target.value)}
+                      placeholder="60"
+                      className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Description</label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={postDescription}
+                    onChange={(e) => setPostDescription(e.target.value)}
+                    placeholder="Describe what you will provide in detail..."
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500 resize-none"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-xs sm:text-sm rounded-xl transition flex items-center justify-center gap-2 shadow-lg"
+                >
+                  <Send className="w-4 h-4" /> Publish Offer
+                </button>
+              </form>
+            </div>
+          )}
+
           {/* OTHER TABS */}
           {activeTab === 'escrow' && activeJob && (
             <div className="bg-slate-950 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-6 w-full">
@@ -743,6 +849,71 @@ export default function Time2CoinMainApp() {
 
         </main>
       </div>
+
+      {/* MOBILE BOTTOM NAVIGATION BAR (Inspired by Bolt Prototype) */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur border-t border-slate-800/80 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+        <div className="flex items-stretch justify-around px-2 pt-1.5 pb-2">
+          {/* HOME */}
+          <button
+            onClick={() => setActiveTab('dashboard')}
+            className={`flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl transition-all flex-1 ${
+              activeTab === 'dashboard' ? 'text-cyan-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Clock className={`w-5 h-5 ${activeTab === 'dashboard' ? 'scale-110 text-cyan-400' : ''} transition-transform`} />
+            <span className="text-[10px] tracking-tight">Home</span>
+          </button>
+
+          {/* BROWSE */}
+          <button
+            onClick={() => setActiveTab('services')}
+            className={`flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl transition-all flex-1 ${
+              activeTab === 'services' ? 'text-cyan-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <SlidersHorizontal className={`w-5 h-5 ${activeTab === 'services' ? 'scale-110 text-cyan-400' : ''} transition-transform`} />
+            <span className="text-[10px] tracking-tight">Browse</span>
+          </button>
+
+          {/* POST OFFER (RAISED CENTER BUTTON) */}
+          <button
+            onClick={() => setActiveTab('post')}
+            className="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition-all flex-1"
+          >
+            <div className="w-11 h-11 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center -mt-5 shadow-lg shadow-cyan-500/40 ring-4 ring-slate-950">
+              <Plus className="w-6 h-6 text-white" />
+            </div>
+            <span className={`text-[10px] font-bold mt-0.5 ${activeTab === 'post' ? 'text-cyan-400' : 'text-slate-400'}`}>
+              Post
+            </span>
+          </button>
+
+          {/* FOOD RESCUE */}
+          <button
+            onClick={() => setActiveTab('food')}
+            className={`flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl transition-all flex-1 ${
+              activeTab === 'food' ? 'text-amber-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Utensils className={`w-5 h-5 ${activeTab === 'food' ? 'scale-110 text-amber-400' : ''} transition-transform`} />
+            <span className="text-[10px] tracking-tight">Food</span>
+          </button>
+
+          {/* ESCROW / CORPORATE */}
+          <button
+            onClick={() => setActiveTab('escrow')}
+            className={`flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl transition-all flex-1 relative ${
+              activeTab === 'escrow' ? 'text-cyan-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Lock className={`w-5 h-5 ${activeTab === 'escrow' ? 'scale-110 text-cyan-400' : ''} transition-transform`} />
+            <span className="text-[10px] tracking-tight">Escrow</span>
+            {activeJob && activeJob.status !== 'RATED' && (
+              <span className="absolute top-1 right-3 w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+            )}
+          </button>
+        </div>
+      </nav>
     </div>
   );
 }
