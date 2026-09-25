@@ -10,6 +10,8 @@ import {
 
 type TransactionStatus = 'REQUESTED' | 'ESCROW_LOCKED' | 'SERVICE_DELIVERED' | 'VERIFIED_AND_PAID' | 'RATED';
 
+const RATING_STARS = [1, 2, 3, 4, 5] as const;
+
 interface ServiceItem {
   id: string;
   providerName: string;
@@ -689,7 +691,7 @@ export default function Time2CoinMainApp() {
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-2">Rating</label>
                   <div className="flex gap-2">
-                    {.map((star) => (
+                    {RATING_STARS.map((star) => (
                       <button key={star} type="button" onClick={() => setReviewRating(star)} className={`p-2 rounded-xl border text-xs sm:text-sm font-bold transition flex-1 ${reviewRating >= star ? 'bg-amber-500/20 border-amber-500/50 text-amber-300' : 'bg-slate-900 border-slate-800 text-slate-500'}`}>
                         ★ {star}
                       </button>
