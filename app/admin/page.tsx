@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ShieldCheck, Sliders, Download, FileText, Database, Users, 
-  AlertTriangle, RefreshCw, CheckCircle2, Search, Lock, ArrowLeft, LogIn, LogOut, Check, X
+  AlertTriangle, RefreshCw, CheckCircle2, Search, Lock, ArrowLeft, LogIn, LogOut, Check, X, Key
 } from 'lucide-react';
 
 export default function AdminControlVault() {
@@ -12,7 +12,12 @@ export default function AdminControlVault() {
   const [mutualAidSplit, setMutualAidSplit] = useState<number>(4);
   const [vaultSplit, setVaultSplit] = useState<number>(1);
   const [currentUser, setCurrentUser] = useState<any>(null);
-  
+
+  // Direct Admin Login Form inside /admin if unauthenticated
+  const [adminEmail, setAdminEmail] = useState('admin@time2coin.app');
+  const [adminPassword, setAdminPassword] = useState('SuperAdmin2026!');
+  const [loginError, setLoginError] = useState('');
+
   // Pending Applicant Queue State
   const [pendingApplicants, setPendingApplicants] = useState<any[]>([
     { email: 'bistro@eatlocal.com', name: 'Artisan Cafe & Bakery', role: 'merchant', date: '10 mins ago' },
@@ -23,7 +28,10 @@ export default function AdminControlVault() {
     const saved = localStorage.getItem('time2coin_user');
     if (saved) {
       try {
-        setCurrentUser(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        if (parsed.role === 'admin') {
+          setCurrentUser(parsed);
+        }
       } catch (e) {}
     }
 
@@ -33,9 +41,28 @@ export default function AdminControlVault() {
     }
   }, []);
 
+  const handleDirectAdminLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError('');
+
+    if (adminEmail === 'admin@time2coin.app' && adminPassword === 'SuperAdmin2026!') {
+      const adminUser = {
+        email: 'admin@time2coin.app',
+        password: 'SuperAdmin2026!',
+        role: 'admin',
+        name: 'Founder / Super Admin',
+        redirect: '/admin'
+      };
+      localStorage.setItem('time2coin_user', JSON.stringify(adminUser));
+      setCurrentUser(adminUser);
+    } else {
+      setLoginError('Invalid Admin credentials. Use admin@time2coin.app / SuperAdmin2026!');
+    }
+  };
+
   const handleApproveApplicant = (email: string) => {
     setPendingApplicants(prev => prev.filter(a => a.email !== email));
-    alert(`APPROVED: Applicant [${email}] has been verified and granted full portal access!`);
+    alert(`APPROVED: Applicant [${email}] has been verified and granted access!`);
   };
 
   const handleRejectApplicant = (email: string) => {
@@ -45,44 +72,100 @@ export default function AdminControlVault() {
 
   const handleLogout = () => {
     localStorage.removeItem('time2coin_user');
-    window.location.href = '/auth';
+    setCurrentUser(null);
   };
 
   const handleExportData = (type: 'users' | 'ledger' | 'audit' | 'sql') => {
     alert(`Initiating 1-Click Data Extraction for: [${type.toUpperCase()}]\nDownloading raw CSV/JSON dataset...`);
   };
 
+  // IF NOT LOGGED IN AS ADMIN: SHOW SECURE GATING CARD
+  if (!currentUser || currentUser.role !== 'admin') {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 font-sans p-6 flex items-center justify-center">
+        <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+          <div className="text-center space-y-2">
+            <div className="w-12 h-12 bg-emerald-950/80 border border-emerald-800 rounded-2xl flex items-center justify-center mx-auto text-emerald-400">
+              <ShieldCheck className="w-7 h-7" />
+            </div>
+            <h1 className="text-xl font-extrabold text-white">Super Admin Control Vault</h1>
+            <p className="text-xs text-slate-400">Restricted Administrative System • Authentication Required</p>
+          </div>
+
+          <form onSubmit={handleDirectAdminLogin} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Admin Email</label>
+              <input
+                type="email"
+                required
+                value={adminEmail}
+                onChange={(e) => setAdminEmail(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Admin Password</label>
+              <input
+                type="password"
+                required
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+
+            {loginError && (
+              <div className="p-3 bg-rose-950/80 border border-rose-800 rounded-xl text-xs text-rose-300 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-rose-400" />
+                <span>{loginError}</span>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm rounded-xl transition shadow-lg flex items-center justify-center gap-2"
+            >
+              <Key className="w-4 h-4" /> Authenticate Super Admin Vault
+            </button>
+          </form>
+
+          <div className="pt-2 text-center border-t border-slate-800">
+            <a href="/" className="text-xs text-slate-400 hover:text-white flex items-center justify-center gap-1">
+              <ArrowLeft className="w-3.5 h-3.5" /> Return to Public App
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // IF LOGGED IN AS ADMIN: RENDER FULL ADMIN VAULT
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans p-6">
-      <header className="max-w-7xl mx-auto flex items-center justify-between pb-6 border-b border-slate-800 mb-6">
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans p-4 sm:p-6">
+      <header className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-slate-800 mb-6">
         <div className="flex items-center gap-3">
           <a href="/" className="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl transition">
             <ArrowLeft className="w-5 h-5 text-slate-300" />
           </a>
           <div>
-            <h1 className="text-2xl font-black text-white flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
               <ShieldCheck className="w-7 h-7 text-emerald-400" /> Staff Admin Control Vault
             </h1>
             <p className="text-xs text-slate-400">Role-Based Access Control (RBAC) • Tiers 1 through 4</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          {currentUser ? (
-            <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl">
-              <div className="text-right">
-                <span className="text-xs font-bold text-white block">{currentUser.name}</span>
-                <span className="text-[10px] text-emerald-400 block">{currentUser.role}</span>
-              </div>
-              <button onClick={handleLogout} className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition ml-1" title="Logout">
-                <LogOut className="w-3.5 h-3.5" />
-              </button>
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+          <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl">
+            <div className="text-right">
+              <span className="text-xs font-bold text-white block">{currentUser.name}</span>
+              <span className="text-[10px] text-emerald-400 block">{currentUser.role}</span>
             </div>
-          ) : (
-            <a href="/auth" className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5">
-              <LogIn className="w-3.5 h-3.5" /> Admin Login
-            </a>
-          )}
+            <button onClick={handleLogout} className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition ml-1" title="Logout">
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
+          </div>
 
           <div className="flex bg-slate-900 border border-slate-800 p-1 rounded-2xl">
             {[1, 2, 3, 4].map((tier) => (
@@ -99,9 +182,8 @@ export default function AdminControlVault() {
       </header>
 
       <main className="max-w-7xl mx-auto space-y-6">
-        
-        {/* TIER 1/4 ADMIN APPROVAL QUEUE FOR MERCHANTS & CORPORATES */}
-        <section className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
+        {/* TIER APPROVAL QUEUE */}
+        <section className="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 space-y-4 shadow-xl">
           <div className="flex justify-between items-center border-b border-slate-800 pb-3">
             <div>
               <h2 className="text-base font-bold text-white flex items-center gap-2">
@@ -110,7 +192,7 @@ export default function AdminControlVault() {
               <p className="text-xs text-slate-400">Review pending business applications requiring manual Admin verification.</p>
             </div>
             <span className="text-xs font-bold bg-amber-950 text-amber-300 border border-amber-800 px-3 py-1 rounded-full">
-              {pendingApplicants.length} Pending Verification
+              {pendingApplicants.length} Pending
             </span>
           </div>
 
@@ -135,7 +217,7 @@ export default function AdminControlVault() {
 
                   <div className="flex gap-2">
                     <button onClick={() => handleApproveApplicant(app.email)} className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-md">
-                      <Check className="w-3.5 h-3.5" /> Approve Access
+                      <Check className="w-3.5 h-3.5" /> Approve
                     </button>
                     <button onClick={() => handleRejectApplicant(app.email)} className="px-3 py-1.5 bg-slate-800 hover:bg-rose-900 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition flex items-center gap-1">
                       <X className="w-3.5 h-3.5" /> Decline
@@ -147,9 +229,9 @@ export default function AdminControlVault() {
           )}
         </section>
 
-        {/* TIER 4: GLOBAL PARAMETER SLIDERS */}
+        {/* TIER 4: PARAMETER SLIDERS */}
         {selectedTier === 4 && (
-          <section className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
+          <section className="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 space-y-4">
             <h2 className="text-base font-bold text-white flex items-center gap-2">
               <Sliders className="w-5 h-5 text-cyan-400" /> Feature 5 Reserve Parameter Sliders
             </h2>
@@ -183,7 +265,7 @@ export default function AdminControlVault() {
 
         {/* DATA EXTRACTION ENGINE */}
         {(selectedTier === 4 || selectedTier === 2) && (
-          <section className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
+          <section className="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 space-y-4">
             <h2 className="text-base font-bold text-white flex items-center gap-2">
               <Download className="w-5 h-5 text-emerald-400" /> 1-Click Backend Data Extraction Engine
             </h2>
