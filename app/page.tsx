@@ -204,8 +204,8 @@ export default function Time2CoinMainApp() {
   };
 
   const handleLockHolding = (service: ServiceItem) => {
+    // Smooth high-converting flow: If user is not logged in, seamlessly redirect to Auth page
     if (!currentUser) {
-      alert("Please Sign In first to lock holding for community services.");
       window.location.href = '/auth';
       return;
     }
@@ -260,7 +260,6 @@ export default function Time2CoinMainApp() {
   const handleCreateOffer = (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) {
-      alert("Please Sign In first to post a service offer.");
       window.location.href = '/auth';
       return;
     }
@@ -332,8 +331,8 @@ export default function Time2CoinMainApp() {
             <a href="#calculator" className="px-3 py-1.5 text-slate-300 hover:text-white rounded-lg text-xs font-semibold transition">
               Calculator
             </a>
-            <a href="#categories" className="px-3 py-1.5 text-slate-300 hover:text-white rounded-lg text-xs font-semibold transition">
-              Categories
+            <a href="#directory" className="px-3 py-1.5 text-slate-300 hover:text-white rounded-lg text-xs font-semibold transition">
+              Services & Food
             </a>
             <a href="/merchant" className="px-3 py-1.5 text-slate-300 hover:text-amber-400 rounded-lg text-xs font-semibold transition flex items-center gap-1">
               <Utensils className="w-3.5 h-3.5 text-amber-400" /> Merchant Portal
@@ -375,10 +374,12 @@ export default function Time2CoinMainApp() {
 
           {/* MOBILE HEADER UTILITIES */}
           <div className="flex lg:hidden items-center gap-2">
-            <div className="bg-cyan-950/80 border border-cyan-800/80 rounded-full px-2.5 py-1 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-              <span className="font-extrabold text-xs text-cyan-300">{walletBalance}m</span>
-            </div>
+            {currentUser && (
+              <div className="bg-cyan-950/80 border border-cyan-800/80 rounded-full px-2.5 py-1 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                <span className="font-extrabold text-xs text-cyan-300">{walletBalance}m</span>
+              </div>
+            )}
 
             {currentUser ? (
               <button
@@ -423,10 +424,10 @@ export default function Time2CoinMainApp() {
               Join Community - 100% Free <ArrowRight className="w-4 h-4" />
             </a>
             <a 
-              href="#how-it-works"
+              href="#directory"
               className="px-6 py-3.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-bold text-xs sm:text-sm rounded-2xl transition"
             >
-              How It Works
+              Browse Skills & Food Offers
             </a>
           </div>
 
@@ -571,36 +572,92 @@ export default function Time2CoinMainApp() {
           </div>
         </section>
 
-        {/* BROWSE BY CATEGORY SECTION */}
-        <section id="categories" className="space-y-4 scroll-mt-24">
-          <div className="flex justify-between items-center">
+        {/* PUBLIC COMMUNITY DIRECTORY: SKILLS + MERCHANT SURPLUS FOOD LISTINGS */}
+        <section id="directory" className="space-y-6 scroll-mt-24">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
             <div>
-              <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider">Explore Marketplace</span>
-              <h2 className="text-xl font-extrabold text-white mt-0.5">Browse Community Services by Category</h2>
+              <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider">Live Marketplace</span>
+              <h2 className="text-xl sm:text-2xl font-black text-white mt-0.5">Explore Available Skills & Merchant Food Offers</h2>
+              <p className="text-xs text-slate-400 mt-1">Click on any offer below to register or sign in and redeem instantly.</p>
             </div>
-            <button onClick={() => setActiveTab('services')} className="text-xs font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-1">
-              View Directory <ChevronRight className="w-4 h-4" />
-            </button>
+
+            <div className="flex flex-wrap gap-1.5">
+              {['All', 'Mechanical', 'Caregiving', 'Gardening', 'Food Rescue'].map((cat) => (
+                <button 
+                  key={cat} 
+                  onClick={() => setSelectedCategory(cat)} 
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition ${
+                    selectedCategory === cat 
+                      ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-md' 
+                      : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-            {[
-              { name: 'Mechanical', color: 'border-cyan-800 text-cyan-300 bg-cyan-950/50' },
-              { name: 'Caregiving', color: 'border-blue-800 text-blue-300 bg-blue-950/50' },
-              { name: 'Tutoring', color: 'border-purple-800 text-purple-300 bg-purple-950/50' },
-              { name: 'Gardening', color: 'border-emerald-800 text-emerald-300 bg-emerald-950/50' },
-              { name: 'Food Rescue', color: 'border-amber-800 text-amber-300 bg-amber-950/50' }
-            ].map((cat) => (
-              <button
-                key={cat.name}
-                onClick={() => {
-                  setSelectedCategory(cat.name);
-                  setActiveTab('services');
-                }}
-                className={`p-4 border rounded-2xl font-bold text-xs text-center transition hover:scale-105 ${cat.color}`}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+            {filteredServices.map((service) => (
+              <div 
+                key={service.id} 
+                className={`border rounded-2xl p-5 space-y-4 transition flex flex-col justify-between w-full shadow-lg ${
+                  service.isMerchantSurplus 
+                    ? 'bg-gradient-to-b from-slate-950 via-slate-900 to-amber-950/30 border-amber-800/60 hover:border-amber-500' 
+                    : 'bg-slate-950 border-slate-800 hover:border-cyan-500/60'
+                }`}
               >
-                {cat.name}
-              </button>
+                <div>
+                  <div className="flex justify-between items-start mb-2">
+                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${
+                      service.isMerchantSurplus
+                        ? 'text-amber-300 bg-amber-950 border-amber-800'
+                        : 'text-cyan-300 bg-cyan-950 border-cyan-800'
+                    }`}>
+                      {service.isMerchantSurplus ? 'Merchant Surplus Food' : service.category}
+                    </span>
+                    <div className="text-right">
+                      <span className={`text-lg font-black ${service.isMerchantSurplus ? 'text-amber-300' : 'text-white'}`}>
+                        {service.estimatedMinutes}
+                      </span>
+                      <span className="text-xs text-slate-400 ml-1">Mins</span>
+                    </div>
+                  </div>
+                  <h3 className="font-bold text-slate-100 text-base">{service.title}</h3>
+                  <p className="text-xs text-slate-300 leading-relaxed mt-2">{service.description}</p>
+                </div>
+
+                <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                  <div>
+                    <div className="text-xs text-slate-200 font-semibold">{service.providerName}</div>
+                    <div className="flex items-center gap-2 text-[10px] sm:text-xs">
+                      <span className="text-amber-400 font-bold">★ {service.providerRating}</span>
+                      <span className="text-slate-500">•</span>
+                      <span className="text-emerald-400 font-medium">{service.providerTrustScore}% Trust Score</span>
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={() => handleLockHolding(service)} 
+                    className={`px-4 py-2 font-bold text-xs rounded-xl transition flex items-center gap-1.5 shadow-md ${
+                      service.isMerchantSurplus
+                        ? 'bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 text-white'
+                        : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 text-white'
+                    }`}
+                  >
+                    {service.isMerchantSurplus ? (
+                      <>
+                        <Utensils className="w-3.5 h-3.5" /> Redeem Meal
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="w-3.5 h-3.5" /> Book Job
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         </section>
@@ -642,8 +699,44 @@ export default function Time2CoinMainApp() {
           </div>
         </section>
 
+        {/* VERIFIED COMMUNITY TESTIMONIALS SECTION */}
+        <section className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-6 shadow-2xl">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div>
+              <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider">Verified Social Proof</span>
+              <h2 className="text-lg font-extrabold text-white mt-1 flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-cyan-400" /> Member Stories & Testimonials
+              </h2>
+            </div>
+            <span className="text-xs font-bold bg-cyan-950 text-cyan-300 border border-cyan-800 px-3 py-1 rounded-full">
+              ★ 4.98 Community Rating
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {testimonials.map((t, idx) => (
+              <div key={idx} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between space-y-4">
+                <div className="space-y-3">
+                  <Quote className="w-6 h-6 text-cyan-500/40" />
+                  <p className="text-xs text-slate-300 leading-relaxed italic">"{t.quote}"</p>
+                </div>
+
+                <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold text-white text-xs">{t.name}</h3>
+                    <span className="text-[10px] text-slate-400 block">{t.role}</span>
+                  </div>
+                  <span className="text-[10px] font-semibold bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded-full">
+                    {t.badge}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* LOGGED-IN DYNAMIC MEMBER DASHBOARD & HOLDING DETAILS (ONLY ACCESSIBLE/SHOWN FOR LOGGED-IN MEMBERS) */}
-        {currentUser && activeTab === 'dashboard' && (
+        {currentUser && (
           <div className="space-y-6 w-full border-t border-slate-800 pt-8">
             <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl w-full">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -698,136 +791,6 @@ export default function Time2CoinMainApp() {
             )}
           </div>
         )}
-
-        {/* SERVICES DIRECTORY VIEW */}
-        {activeTab === 'services' && (
-          <div className="space-y-8 w-full">
-            <div className="space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-base font-bold text-white">Community Service Directory</h2>
-                <div className="flex flex-wrap gap-1.5">
-                  {['All', 'Mechanical', 'Caregiving', 'Gardening', 'Food Rescue'].map((cat) => (
-                    <button key={cat} onClick={() => setSelectedCategory(cat)} className={`px-3 py-1 rounded-full text-xs font-semibold transition ${selectedCategory === cat ? 'bg-cyan-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-slate-200'}`}>
-                      {cat}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-                {filteredServices.map((service) => (
-                  <div key={service.id} className="bg-slate-950 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-4 hover:border-slate-700 transition flex flex-col justify-between w-full">
-                    <div>
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="text-[10px] font-semibold text-cyan-400 bg-cyan-950 px-2 py-0.5 rounded-full border border-cyan-800/50">
-                          {service.category}
-                        </span>
-                        <div className="text-right">
-                          <span className="text-base sm:text-lg font-black text-white">{service.estimatedMinutes}</span>
-                          <span className="text-xs text-slate-400 ml-1">Mins</span>
-                        </div>
-                      </div>
-                      <h3 className="font-bold text-slate-100 text-sm sm:text-base">{service.title}</h3>
-                      <p className="text-xs text-slate-400 leading-relaxed mt-2">{service.description}</p>
-                    </div>
-
-                    <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
-                      <div>
-                        <div className="text-xs text-slate-200 font-semibold">{service.providerName}</div>
-                        <div className="flex items-center gap-2 text-[10px] sm:text-xs">
-                          <span className="text-amber-400 font-bold">★ {service.providerRating}</span>
-                          <span className="text-slate-500">•</span>
-                          <span className="text-emerald-400 font-medium">{service.providerTrustScore}% Trust Score</span>
-                        </div>
-                      </div>
-
-                      <button onClick={() => handleLockHolding(service)} className="px-3 py-1.5 sm:px-4 sm:py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-xs rounded-xl transition flex items-center gap-1">
-                        <Lock className="w-3.5 h-3.5" /> Book Job
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* MERCHANT SURPLUS & FOOD RESCUE SHOWCASE */}
-        <section id="food" className="bg-slate-950 border border-amber-800/50 rounded-3xl p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Utensils className="w-7 h-7 text-amber-400 shrink-0" />
-              <div>
-                <h2 className="text-base font-bold text-white">Merchant Surplus Food Rescue</h2>
-                <p className="text-xs text-slate-300">Spend Time Minutes earned anywhere in the community on fresh surplus meals from local restaurant partners.</p>
-              </div>
-            </div>
-            <a href="/merchant" className="text-xs font-bold text-amber-400 hover:text-amber-300 hidden sm:flex items-center gap-1">
-              Merchant Portal <ArrowUpRight className="w-3.5 h-3.5" />
-            </a>
-          </div>
-
-          {services.filter(s => s.isMerchantSurplus).map((service) => (
-            <div key={service.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-3 w-full">
-              <div className="flex justify-between items-start">
-                <div>
-                  <span className="text-[10px] font-bold text-amber-400 bg-amber-950 px-2 py-0.5 rounded-full border border-amber-800/50">
-                    Merchant Surplus
-                  </span>
-                  <h3 className="font-bold text-white text-sm sm:text-base mt-2">{service.title}</h3>
-                  <p className="text-xs text-slate-400 mt-1">{service.description}</p>
-                </div>
-                <div className="text-right">
-                  <span className="text-xl sm:text-2xl font-black text-amber-300">{service.estimatedMinutes}</span>
-                  <span className="text-xs text-slate-400 block">Time Mins</span>
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
-                <span className="text-xs text-slate-300 font-semibold">{service.providerName}</span>
-                <button onClick={() => handleLockHolding(service)} className="px-3 py-1.5 sm:px-4 sm:py-2 bg-gradient-to-r from-amber-600 to-amber-500 text-white font-bold text-xs rounded-xl transition shadow-lg">
-                  Redeem Surplus Meal
-                </button>
-              </div>
-            </div>
-          ))}
-        </section>
-
-        {/* VERIFIED COMMUNITY TESTIMONIALS SECTION */}
-        <section className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-6 shadow-2xl">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-            <div>
-              <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider">Verified Social Proof</span>
-              <h2 className="text-lg font-extrabold text-white mt-1 flex items-center gap-2">
-                <MessageSquare className="w-5 h-5 text-cyan-400" /> Member Stories & Testimonials
-              </h2>
-            </div>
-            <span className="text-xs font-bold bg-cyan-950 text-cyan-300 border border-cyan-800 px-3 py-1 rounded-full">
-              ★ 4.98 Community Rating
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {testimonials.map((t, idx) => (
-              <div key={idx} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between space-y-4">
-                <div className="space-y-3">
-                  <Quote className="w-6 h-6 text-cyan-500/40" />
-                  <p className="text-xs text-slate-300 leading-relaxed italic">"{t.quote}"</p>
-                </div>
-
-                <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
-                  <div>
-                    <h3 className="font-bold text-white text-xs">{t.name}</h3>
-                    <span className="text-[10px] text-slate-400 block">{t.role}</span>
-                  </div>
-                  <span className="text-[10px] font-semibold bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded-full">
-                    {t.badge}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
 
         {/* LOGGED-IN ONLY TAB: POST NEW OFFER */}
         {currentUser && activeTab === 'post' && (
@@ -1002,26 +965,22 @@ export default function Time2CoinMainApp() {
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur border-t border-slate-800/80 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
         <div className="flex items-stretch justify-around px-2 pt-1.5 pb-2">
           {/* HOME */}
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            className={`flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl transition-all flex-1 ${
-              activeTab === 'dashboard' ? 'text-cyan-400 font-bold' : 'text-slate-400 hover:text-slate-200'
-            }`}
+          <a
+            href="/"
+            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl transition-all flex-1 text-cyan-400 font-bold"
           >
-            <Clock className={`w-5 h-5 ${activeTab === 'dashboard' ? 'scale-110 text-cyan-400' : ''} transition-transform`} />
+            <Clock className="w-5 h-5 scale-110 text-cyan-400 transition-transform" />
             <span className="text-[10px] tracking-tight">Home</span>
-          </button>
+          </a>
 
-          {/* BROWSE */}
-          <button
-            onClick={() => setActiveTab('services')}
-            className={`flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl transition-all flex-1 ${
-              activeTab === 'services' ? 'text-cyan-400 font-bold' : 'text-slate-400 hover:text-slate-200'
-            }`}
+          {/* BROWSE SKILLS & FOOD */}
+          <a
+            href="#directory"
+            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl transition-all flex-1 text-slate-400 hover:text-slate-200"
           >
-            <SlidersHorizontal className={`w-5 h-5 ${activeTab === 'services' ? 'scale-110 text-cyan-400' : ''} transition-transform`} />
-            <span className="text-[10px] tracking-tight">Browse</span>
-          </button>
+            <SlidersHorizontal className="w-5 h-5 transition-transform" />
+            <span className="text-[10px] tracking-tight">Directory</span>
+          </a>
 
           {/* POST OFFER (RAISED CENTER BUTTON) */}
           <button
@@ -1037,21 +996,20 @@ export default function Time2CoinMainApp() {
             <div className="w-11 h-11 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center -mt-5 shadow-lg shadow-cyan-500/40 ring-4 ring-slate-950">
               <Plus className="w-6 h-6 text-white" />
             </div>
-            <span className={`text-[10px] font-bold mt-0.5 ${activeTab === 'post' ? 'text-cyan-400' : 'text-slate-400'}`}>
+            <span className="text-[10px] font-bold mt-0.5 text-slate-400">
               Post
             </span>
           </button>
 
-          {/* FOOD RESCUE */}
-          <button
-            onClick={() => setActiveTab('food')}
-            className={`flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl transition-all flex-1 ${
-              activeTab === 'food' ? 'text-amber-400 font-bold' : 'text-slate-400 hover:text-slate-200'
-            }`}
+          {/* FOOD RESCUE QUICK NAV */}
+          <a
+            href="#directory"
+            onClick={() => setSelectedCategory('Food Rescue')}
+            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl transition-all flex-1 text-slate-400 hover:text-amber-400"
           >
-            <Utensils className={`w-5 h-5 ${activeTab === 'food' ? 'scale-110 text-amber-400' : ''} transition-transform`} />
+            <Utensils className="w-5 h-5 transition-transform" />
             <span className="text-[10px] tracking-tight">Food</span>
-          </button>
+          </a>
 
           {/* CONDITIONAL TAB: HOLDING (LOGGED-IN) vs SIGN IN (LOGGED-OUT) */}
           {currentUser ? (
