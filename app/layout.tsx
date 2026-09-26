@@ -1,31 +1,19 @@
-import { Inter } from "next/font/google";
-import { ThemeProvider } from "next-themes";
-import "./globals.css";
+import type { Metadata } from 'next';
 
-const inter = Inter({ subsets: ["latin"] });
-
-export const metadata = {
-  title: "time2coin | Universal Time Economy",
-  description: "1 Hour = 1 Hour Universal Time Equity Platform",
+export const metadata: Metadata = {
+  title: 'time2coin – Trade Skills & Get Food Without Cash | Community Time Bank',
+  description: 'Trade skills with neighbors and rescue fresh restaurant surplus meals with zero cash. 1 hour = 1 hour equal time equity. Join 1,000+ local members today!',
+  keywords: ['time banking', 'food rescue', 'skill exchange', 'time2coin', 'community currency', 'surplus food', 'time equity'],
+  openGraph: {
+    title: 'time2coin – Trade Skills & Get Food Without Cash',
+    description: 'Trade skills with neighbors and rescue fresh restaurant surplus meals with zero cash. 1 hour = 1 hour equal time equity.',
+    images: ['/Designer.png'],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'time2coin – Trade Skills & Get Food Without Cash',
+    description: '1 hour = 1 hour equal time equity. Trade skills and rescue surplus food without cash.',
+    images: ['/Designer.png'],
+  },
 };
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} bg-slate-950 text-slate-100 antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
-      </body>
-    </html>
-  );
-}
