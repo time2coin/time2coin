@@ -290,26 +290,29 @@ export default function Time2CoinMainApp() {
               Services & Food
             </a>
 
-            {/* PARTNERS DROPDOWN MENU */}
-            <div className="relative">
-              <button 
-                onClick={() => setPartnerMenuOpen(!partnerMenuOpen)}
-                className="px-3 py-1.5 text-slate-300 hover:text-white rounded-lg text-xs font-semibold transition flex items-center gap-1 bg-slate-900 border border-slate-800"
-              >
-                For Partners <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-              </button>
+            {/* PARTNERS DROPDOWN MENU WITH ALL 3 PORTALS */}
+<div className="relative">
+  <button 
+    onClick={() => setPartnerMenuOpen(!partnerMenuOpen)}
+    className="px-3 py-1.5 text-slate-300 hover:text-white rounded-lg text-xs font-semibold transition flex items-center gap-1 bg-slate-900 border border-slate-800"
+  >
+    For Partners <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+  </button>
 
-              {partnerMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-2 z-50 space-y-1">
-                  <a href="/merchant" className="flex items-center gap-2 px-3 py-2 text-xs text-amber-300 hover:bg-slate-800 rounded-xl transition font-medium">
-                    <Utensils className="w-3.5 h-3.5 text-amber-400" /> Merchant Food Portal
-                  </a>
-                  <a href="/corporate" className="flex items-center gap-2 px-3 py-2 text-xs text-blue-300 hover:bg-slate-800 rounded-xl transition font-medium">
-                    <Building2 className="w-3.5 h-3.5 text-blue-400" /> Corporate CSR Portal
-                  </a>
-                </div>
-              )}
-            </div>
+  {partnerMenuOpen && (
+    <div className="absolute right-0 mt-2 w-52 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-2 z-50 space-y-1">
+      <a href="/merchant" className="flex items-center gap-2 px-3 py-2 text-xs text-amber-300 hover:bg-slate-800 rounded-xl transition font-medium">
+        <Utensils className="w-3.5 h-3.5 text-amber-400" /> Merchant Food Portal
+      </a>
+      <a href="/corporate" className="flex items-center gap-2 px-3 py-2 text-xs text-blue-300 hover:bg-slate-800 rounded-xl transition font-medium">
+        <Building2 className="w-3.5 h-3.5 text-blue-400" /> Corporate CSR Portal
+      </a>
+      <a href="/donors" className="flex items-center gap-2 px-3 py-2 text-xs text-rose-300 hover:bg-slate-800 rounded-xl transition font-medium">
+        <Heart className="w-3.5 h-3.5 text-rose-400" /> Private Donors Portal
+      </a>
+    </div>
+  )}
+</div>
 
             {currentUser ? (
               <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1 rounded-xl ml-2">
