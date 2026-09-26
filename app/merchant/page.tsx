@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Utensils, Store, ArrowRight, ShieldCheck, CheckCircle2, 
-  Sparkles, Leaf, LogIn, Plus, Send, AlertCircle
+  Sparkles, Leaf, LogIn, Plus, Send, ArrowLeft
 } from 'lucide-react';
 
 export default function MerchantPortalPage() {
@@ -42,15 +42,25 @@ export default function MerchantPortalPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-16">
-      {/* HEADER */}
+      {/* HEADER WITH PROMINENT BACK TO HOME BUTTON */}
       <header className="border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-40 px-4 py-3">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <a href="/" className="flex items-center gap-2">
-            <div className="p-1 bg-amber-500/20 border border-amber-500/40 rounded-xl">
-              <Utensils className="w-5 h-5 text-amber-400" />
-            </div>
-            <span className="font-bold text-lg text-white">time2coin <span className="text-amber-400 text-xs font-normal">| Merchant Portal</span></span>
-          </a>
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+          <div className="flex items-center gap-3">
+            {/* PROMINENT BACK TO HOME BUTTON */}
+            <a 
+              href="/" 
+              className="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
+            >
+              <ArrowLeft className="w-4 h-4 text-cyan-400" /> Back to Home
+            </a>
+
+            <a href="/" className="flex items-center gap-2">
+              <div className="p-1 bg-amber-500/20 border border-amber-500/40 rounded-xl">
+                <Utensils className="w-5 h-5 text-amber-400" />
+              </div>
+              <span className="font-bold text-lg text-white">time2coin <span className="text-amber-400 text-xs font-normal hidden sm:inline">| Merchant Portal</span></span>
+            </a>
+          </div>
           
           {currentUser ? (
             <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1 rounded-xl">
