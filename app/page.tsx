@@ -7,7 +7,7 @@ import {
   RefreshCw, Sliders, ChevronRight, Utensils, Wifi, Building2, 
   SlidersHorizontal, Download, FileText, Users, HelpCircle, LogIn, LogOut, 
   MessageSquare, Quote, Globe, Plus, Store, LayoutDashboard, Send, TrendingUp,
-  Calculator, ArrowUpRight, Heart, Zap, Leaf, Shield, ChevronDown
+  Calculator, ArrowUpRight, Heart, Zap, Leaf, Shield, ChevronDown, Menu, X
 } from 'lucide-react';
 
 type TransactionStatus = 'REQUESTED' | 'HOLDING_LOCKED' | 'SERVICE_DELIVERED' | 'VERIFIED_AND_PAID' | 'RATED';
@@ -48,6 +48,7 @@ export default function Time2CoinMainApp() {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [partnerMenuOpen, setPartnerMenuOpen] = useState<boolean>(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
   // Interactive Time Calculator State
   const [calcHours, setCalcHours] = useState<number>(2);
@@ -290,29 +291,29 @@ export default function Time2CoinMainApp() {
               Services & Food
             </a>
 
-            {/* PARTNERS DROPDOWN MENU WITH ALL 3 PORTALS */}
-<div className="relative">
-  <button 
-    onClick={() => setPartnerMenuOpen(!partnerMenuOpen)}
-    className="px-3 py-1.5 text-slate-300 hover:text-white rounded-lg text-xs font-semibold transition flex items-center gap-1 bg-slate-900 border border-slate-800"
-  >
-    For Partners <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-  </button>
+            {/* PARTNERS DROPDOWN MENU (DESKTOP) */}
+            <div className="relative">
+              <button 
+                onClick={() => setPartnerMenuOpen(!partnerMenuOpen)}
+                className="px-3 py-1.5 text-slate-300 hover:text-white rounded-lg text-xs font-semibold transition flex items-center gap-1 bg-slate-900 border border-slate-800"
+              >
+                For Partners <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              </button>
 
-  {partnerMenuOpen && (
-    <div className="absolute right-0 mt-2 w-52 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-2 z-50 space-y-1">
-      <a href="/merchant" className="flex items-center gap-2 px-3 py-2 text-xs text-amber-300 hover:bg-slate-800 rounded-xl transition font-medium">
-        <Utensils className="w-3.5 h-3.5 text-amber-400" /> Merchant Food Portal
-      </a>
-      <a href="/corporate" className="flex items-center gap-2 px-3 py-2 text-xs text-blue-300 hover:bg-slate-800 rounded-xl transition font-medium">
-        <Building2 className="w-3.5 h-3.5 text-blue-400" /> Corporate CSR Portal
-      </a>
-      <a href="/donors" className="flex items-center gap-2 px-3 py-2 text-xs text-rose-300 hover:bg-slate-800 rounded-xl transition font-medium">
-        <Heart className="w-3.5 h-3.5 text-rose-400" /> Private Donors Portal
-      </a>
-    </div>
-  )}
-</div>
+              {partnerMenuOpen && (
+                <div className="absolute right-0 mt-2 w-52 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-2 z-50 space-y-1">
+                  <a href="/merchant" className="flex items-center gap-2 px-3 py-2 text-xs text-amber-300 hover:bg-slate-800 rounded-xl transition font-medium">
+                    <Utensils className="w-3.5 h-3.5 text-amber-400" /> Merchant Food Portal
+                  </a>
+                  <a href="/corporate" className="flex items-center gap-2 px-3 py-2 text-xs text-blue-300 hover:bg-slate-800 rounded-xl transition font-medium">
+                    <Building2 className="w-3.5 h-3.5 text-blue-400" /> Corporate CSR Portal
+                  </a>
+                  <a href="/donors" className="flex items-center gap-2 px-3 py-2 text-xs text-rose-300 hover:bg-slate-800 rounded-xl transition font-medium">
+                    <Heart className="w-3.5 h-3.5 text-rose-400" /> Private Donors Portal
+                  </a>
+                </div>
+              )}
+            </div>
 
             {currentUser ? (
               <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1 rounded-xl ml-2">
@@ -338,7 +339,7 @@ export default function Time2CoinMainApp() {
             )}
           </div>
 
-          {/* MOBILE HEADER UTILITIES */}
+          {/* MOBILE HEADER CONTROLS (IPHONE / SMARTPHONE) */}
           <div className="flex lg:hidden items-center gap-2">
             {currentUser && (
               <div className="bg-cyan-950/80 border border-cyan-800/80 rounded-full px-2.5 py-1 flex items-center gap-1.5">
@@ -347,20 +348,64 @@ export default function Time2CoinMainApp() {
               </div>
             )}
 
-            {currentUser ? (
-              <button onClick={handleLogout} className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white">
-                <LogOut className="w-4 h-4" />
-              </button>
-            ) : (
-              <a href="/auth" className="px-3 py-1.5 bg-cyan-600 text-white rounded-xl text-xs font-bold transition">
-                Sign In
-              </a>
-            )}
+            {/* MOBILE MENU TOGGLE BUTTON */}
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white"
+              aria-label="Toggle Navigation Menu"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5 text-cyan-400" /> : <Menu className="w-5 h-5 text-cyan-400" />}
+            </button>
           </div>
         </div>
+
+        {/* MOBILE MENU DRAWER (SLIDES DOWN ON IPHONE CLICK) */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden bg-slate-950 border-b border-slate-800 px-4 py-4 space-y-3 shadow-2xl animate-in slide-in-from-top duration-200">
+            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-1">Navigation</div>
+            <div className="grid grid-cols-2 gap-2">
+              <a href="/" className="px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs font-bold text-cyan-300 flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-cyan-400" /> Home
+              </a>
+              <a href="#directory" onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400" /> Directory
+              </a>
+            </div>
+
+            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-1 pt-2">Partner Portals</div>
+            <div className="space-y-1.5">
+              <a href="/merchant" className="flex items-center justify-between px-3.5 py-2.5 bg-amber-950/40 border border-amber-800/60 rounded-xl text-xs font-bold text-amber-300">
+                <span className="flex items-center gap-2">
+                  <Utensils className="w-4 h-4 text-amber-400" /> Merchant Food Portal
+                </span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </a>
+              <a href="/corporate" className="flex items-center justify-between px-3.5 py-2.5 bg-blue-950/40 border border-blue-800/60 rounded-xl text-xs font-bold text-blue-300">
+                <span className="flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-blue-400" /> Corporate CSR Portal
+                </span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </a>
+              <a href="/donors" className="flex items-center justify-between px-3.5 py-2.5 bg-rose-950/40 border border-rose-800/60 rounded-xl text-xs font-bold text-rose-300">
+                <span className="flex items-center gap-2">
+                  <Heart className="w-4 h-4 text-rose-400" /> Private Donors Portal
+                </span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </a>
+            </div>
+
+            {!currentUser && (
+              <div className="pt-2">
+                <a href="/auth" className="w-full py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg">
+                  <LogIn className="w-4 h-4" /> Register / Sign In
+                </a>
+              </div>
+            )}
+          </div>
+        )}
       </header>
 
-      {/* 1. PUBLIC VISITOR MARKETING FUNNEL (SHOWN ONLY WHEN LOGGED OUT) */}
+      {/* PUBLIC VISITOR MARKETING FUNNEL */}
       {!currentUser && (
         <>
           {/* HERO BANNER */}
@@ -426,7 +471,7 @@ export default function Time2CoinMainApp() {
             </div>
           </section>
 
-          {/* HUMAN STORY BANNER (EARLY PROOF) */}
+          {/* HUMAN STORY BANNER */}
           <section className="bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 border-b border-slate-800 py-4 px-4">
             <div className="max-w-4xl mx-auto flex items-center justify-center gap-3 text-center text-xs text-slate-300">
               <Quote className="w-4 h-4 text-cyan-400 shrink-0 hidden sm:inline" />
@@ -441,7 +486,7 @@ export default function Time2CoinMainApp() {
       {/* BODY CONTENT CONTAINER */}
       <div className="max-w-7xl mx-auto px-4 pt-8 space-y-12 w-full">
 
-        {/* 2. LOGGED-IN MEMBER DASHBOARD (SHOWN ONLY WHEN LOGGED IN) */}
+        {/* LOGGED-IN MEMBER DASHBOARD */}
         {currentUser && (
           <div className="space-y-6 w-full">
             <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl w-full">
@@ -499,7 +544,7 @@ export default function Time2CoinMainApp() {
           </div>
         )}
 
-        {/* "HOW IT WORKS" 3-STEP EXPLANATION (SHOWN FOR PUBLIC VISITORS) */}
+        {/* "HOW IT WORKS" 3-STEP EXPLANATION */}
         {!currentUser && (
           <section id="how-it-works" className="space-y-6 scroll-mt-24">
             <div className="text-center space-y-1">
@@ -541,7 +586,7 @@ export default function Time2CoinMainApp() {
           </section>
         )}
 
-        {/* INTERACTIVE VALUE CALCULATOR (SHOWN FOR PUBLIC VISITORS) */}
+        {/* INTERACTIVE VALUE CALCULATOR */}
         {!currentUser && (
           <section id="calculator" className="bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 scroll-mt-24">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -602,7 +647,7 @@ export default function Time2CoinMainApp() {
           </section>
         )}
 
-        {/* PUBLIC & MEMBER LIVE MARKETPLACE (SKILLS + FOOD LISTINGS) */}
+        {/* PUBLIC & MEMBER LIVE MARKETPLACE */}
         <section id="directory" className="space-y-6 scroll-mt-24">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
             <div>
@@ -901,7 +946,7 @@ export default function Time2CoinMainApp() {
           </div>
         </section>
 
-        {/* CLOSING CALL-TO-ACTION (SHOWN FOR PUBLIC VISITORS) */}
+        {/* CLOSING CALL-TO-ACTION */}
         {!currentUser && (
           <section className="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 border border-slate-800 rounded-3xl p-8 text-center space-y-4 shadow-2xl">
             <h2 className="text-2xl font-black text-white">Ready to Start Trading Time?</h2>
@@ -921,7 +966,7 @@ export default function Time2CoinMainApp() {
 
       </div>
 
-      {/* MOBILE BOTTOM NAVIGATION BAR */}
+      {/* MOBILE BOTTOM NAVIGATION BAR (IPHONE / SMARTPHONE) */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur border-t border-slate-800/80 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
         <div className="flex items-stretch justify-around px-2 pt-1.5 pb-2">
           {/* HOME */}
@@ -944,23 +989,13 @@ export default function Time2CoinMainApp() {
             <span className="text-[10px] tracking-tight">Directory</span>
           </a>
 
-          {/* POST OFFER (RAISED CENTER BUTTON) */}
+          {/* PARTNERS DRAWER TOGGLE (IPHONE ACCESS POINT) */}
           <button
-            onClick={() => {
-              if (!currentUser) {
-                window.location.href = '/auth';
-              } else {
-                setActiveTab('post');
-              }
-            }}
-            className="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition-all flex-1"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-amber-400 hover:text-amber-300 transition-all flex-1"
           >
-            <div className="w-11 h-11 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center -mt-5 shadow-lg shadow-cyan-500/40 ring-4 ring-slate-950">
-              <Plus className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-[10px] font-bold mt-0.5 text-slate-400">
-              Post
-            </span>
+            <Building2 className="w-5 h-5" />
+            <span className="text-[10px] font-bold tracking-tight">Partners</span>
           </button>
 
           {/* FOOD RESCUE QUICK NAV */}
