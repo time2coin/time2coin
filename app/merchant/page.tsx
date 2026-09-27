@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   Utensils, Store, ArrowRight, ShieldCheck, CheckCircle2, 
   Sparkles, Leaf, LogIn, Plus, Send, ArrowLeft, LogOut,
-  Image as ImageIcon, X, ZoomIn, HeartHandshake, Eye
+  Image as ImageIcon, X, ZoomIn, HeartHandshake, Eye, Clock,
+  SlidersHorizontal, Building2, Heart, Shield, Menu
 } from 'lucide-react';
 
 interface FoodItem {
@@ -22,6 +23,7 @@ interface FoodItem {
 
 export default function MerchantPortalPage() {
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
   // Post Surplus Food Form State (Logged-In Merchants)
   const [foodTitle, setFoodTitle] = useState('');
@@ -160,7 +162,7 @@ export default function MerchantPortalPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-16">
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-24 lg:pb-16 overflow-x-hidden w-full">
       {/* HEADER WITH SLEEK RESPONSIVE BACK BUTTON */}
       <header className="border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-40 px-3 sm:px-4 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
@@ -556,6 +558,71 @@ export default function MerchantPortalPage() {
           </div>
         </div>
       )}
+
+      {/* PERSISTENT MOBILE BOTTOM NAVIGATION BAR FOR PARTNER PAGES */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur border-t border-slate-800/80 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+        <div className="flex items-stretch justify-around px-2 pt-1.5 pb-2">
+          {/* HOME */}
+          <a
+            href="/"
+            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-slate-400 hover:text-slate-200 transition-all flex-1"
+          >
+            <Clock className="w-5 h-5" />
+            <span className="text-[10px] tracking-tight">Home</span>
+          </a>
+
+          {/* BROWSE DIRECTORY */}
+          <a
+            href="/#directory"
+            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-slate-400 hover:text-slate-200 transition-all flex-1"
+          >
+            <SlidersHorizontal className="w-5 h-5" />
+            <span className="text-[10px] tracking-tight">Directory</span>
+          </a>
+
+          {/* RAISED CENTER + POST BUTTON */}
+          <a
+            href={currentUser ? "/#post" : "/auth"}
+            className="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition-all flex-1"
+            title="Post Food / Skill Offer"
+          >
+            <div className="w-11 h-11 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 flex items-center justify-center -mt-5 shadow-lg shadow-amber-500/40 ring-4 ring-slate-950">
+              <Plus className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-[10px] font-bold mt-0.5 text-amber-400">
+              Post
+            </span>
+          </a>
+
+          {/* ACTIVE PARTNER PORTAL TAB */}
+          <a
+            href="/merchant"
+            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-amber-400 font-bold transition-all flex-1"
+          >
+            <Utensils className="w-5 h-5 scale-110" />
+            <span className="text-[10px] tracking-tight">Merchant</span>
+          </a>
+
+          {/* ACCOUNT / SIGN IN */}
+          {currentUser ? (
+            <button
+              onClick={handleLogout}
+              className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-slate-400 hover:text-rose-400 transition-all flex-1"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="text-[10px] tracking-tight">Sign Out</span>
+            </button>
+          ) : (
+            <a
+              href="/auth"
+              className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-slate-400 hover:text-cyan-400 transition-all flex-1"
+            >
+              <LogIn className="w-5 h-5" />
+              <span className="text-[10px] tracking-tight">Sign In</span>
+            </a>
+          )}
+        </div>
+      </nav>
     </div>
   );
 }
