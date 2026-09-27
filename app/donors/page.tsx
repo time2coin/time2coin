@@ -2,14 +2,20 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  Heart, ShieldCheck, CheckCircle2, ArrowRight, Sparkles, 
-  Users, HandCoins, Shield, LogIn, DollarSign, ArrowLeft, LogOut
+  Heart, ArrowLeft, LogIn, LogOut, ArrowRight, ShieldCheck, 
+  CheckCircle2, Sparkles, DollarSign, Users, Award, MessageSquare, 
+  Quote, Clock, SlidersHorizontal, Plus
 } from 'lucide-react';
 
-export default function PrivateDonorsPage() {
+export default function PrivateDonorsPortalPage() {
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [amount, setAmount] = useState('100');
-  const [donated, setDonated] = useState(false);
+  const [selectedAmount, setSelectedAmount] = useState<number>(25);
+  const [customAmount, setCustomAmount] = useState('');
+  const [donorName, setDonorName] = useState('');
+  const [donorEmail, setDonorEmail] = useState('');
+  const [testimonial, setTestimonial] = useState('');
+  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [donationSuccess, setDonationSuccess] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('time2coin_user');
@@ -25,26 +31,27 @@ export default function PrivateDonorsPage() {
     setCurrentUser(null);
   };
 
-  const handleDonate = (e: React.FormEvent) => {
+  const handleDonationSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentUser) {
-      window.location.href = '/auth';
-      return;
-    }
-    setDonated(true);
+    setDonationSuccess(true);
+    setTimeout(() => {
+      setDonationSuccess(false);
+      setCustomAmount('');
+      setTestimonial('');
+    }, 3000);
   };
 
+  const activeAmount = customAmount ? Number(customAmount) : selectedAmount;
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-16">
-      {/* HEADER WITH SLEEK RESPONSIVE BACK BUTTON */}
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-24 lg:pb-12">
+      {/* HEADER */}
       <header className="border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-40 px-3 sm:px-4 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            {/* SLEEK RESPONSIVE BACK BUTTON */}
             <a 
               href="/" 
               className="p-2 sm:px-3 sm:py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-sm"
-              title="Back to Home"
             >
               <ArrowLeft className="w-4 h-4 text-cyan-400" />
               <span className="hidden sm:inline">Back to Home</span>
@@ -57,148 +64,184 @@ export default function PrivateDonorsPage() {
               <span className="font-bold text-sm sm:text-lg text-white truncate">time2coin <span className="text-rose-400 text-xs font-normal hidden md:inline">| Private Donors Portal</span></span>
             </a>
           </div>
-          
+
           {currentUser ? (
             <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-xl shrink-0">
-              <span className="text-[10px] sm:text-xs font-bold text-rose-300 truncate max-w-[100px] sm:max-w-none">{currentUser.name}</span>
+              <span className="text-[10px] sm:text-xs font-bold text-rose-300 truncate">{currentUser.name}</span>
               <button onClick={handleLogout} title="Sign Out" className="p-1 text-slate-400 hover:text-rose-400">
                 <LogOut className="w-3.5 h-3.5" />
               </button>
             </div>
           ) : (
             <a href="/auth" className="px-3 sm:px-4 py-1.5 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 text-white rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center gap-1 shrink-0 shadow-md">
-              <LogIn className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Register / </span>Sign In
+              <LogIn className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Donor </span>Sign In
             </a>
           )}
         </div>
       </header>
 
-      {/* HERO SECTION */}
-      <section className="bg-gradient-to-r from-slate-950 via-slate-900 to-rose-950/40 border-b border-slate-800 py-12 px-4">
+      {/* HERO BANNER */}
+      <section className="bg-gradient-to-r from-slate-950 via-slate-900 to-rose-950/60 border-b border-slate-800 py-12 px-4">
         <div className="max-w-4xl mx-auto text-center space-y-4">
           <div className="inline-flex items-center gap-2 bg-rose-950/80 border border-rose-800/60 px-4 py-1 rounded-full text-xs font-bold text-rose-300">
-            <Heart className="w-4 h-4 text-rose-400 fill-rose-400/30" /> Dignity-First Private Patronage
+            <Heart className="w-4 h-4 text-rose-400" /> Micro-Donation Test Drive ($10 to $100k)
           </div>
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-            Sponsor Mutual Aid for <span className="text-rose-400">Vulnerable Neighbors</span>
+            Direct Meal & Care <span className="text-rose-400">Impact Sponsoring</span>
           </h1>
           <p className="text-xs sm:text-base text-slate-300 leading-relaxed max-w-2xl mx-auto">
-            Targeted for individual patrons and philanthropists. Register as a patron to fund the 4% Mutual Aid Reserve Pool, subsidizing Time Minutes for seniors and families with 100% transparent ledger tracking.
+            Test drive time2coin with a small donation. Every \$12 sponsors a gourmet surplus meal pass and mobilizes 1 hour of community care with 100% audit transparency.
           </p>
         </div>
       </section>
 
-      {/* VALUE PROPOSITIONS */}
-      <div className="max-w-6xl mx-auto px-4 py-12 space-y-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-rose-950 border border-rose-800 flex items-center justify-center text-rose-400 font-bold">
-              <Shield className="w-5 h-5" />
-            </div>
-            <h3 className="font-bold text-white text-base">100% Traceable Mutual Aid</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Every dollar directly backs the community reserve pool, funding senior care passes and emergency meal redemptions.
-            </p>
+      {/* MAIN CONTENT */}
+      <div className="max-w-6xl mx-auto px-4 py-10 space-y-10">
+        <div className="bg-slate-900 border border-rose-800/40 rounded-3xl p-6 sm:p-8 max-w-2xl mx-auto space-y-6 shadow-2xl">
+          <div className="border-b border-slate-800 pb-3">
+            <h2 className="text-lg font-bold text-white">Select Micro-Donation Amount</h2>
+            <p className="text-xs text-slate-400">See direct impact breakdown before confirming.</p>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-cyan-950 border border-cyan-800 flex items-center justify-center text-cyan-400 font-bold">
-              <Users className="w-5 h-5" />
-            </div>
-            <h3 className="font-bold text-white text-base">Dignity-First Assistance</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Beneficiaries receive credits in their personal Time Wallet, removing the stigma associated with conventional food banks.
-            </p>
-          </div>
-
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-950 border border-emerald-800 flex items-center justify-center text-emerald-400 font-bold">
-              <HandCoins className="w-5 h-5" />
-            </div>
-            <h3 className="font-bold text-white text-base">Transparent Patron Ledger</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Registered patrons receive pseudonymous impact receipts showing real care delivered to community members.
-            </p>
-          </div>
-        </div>
-
-        {/* CONDITIONALLY RENDERED DONATION FORM VS REGISTRATION GATE */}
-        <div className="bg-slate-900 border border-rose-800/40 rounded-3xl p-6 sm:p-8 max-w-xl mx-auto shadow-2xl space-y-6">
-          {currentUser ? (
-            /* LOGGED-IN PATRON DASHBOARD */
-            <div className="space-y-4">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-3">
-                <Heart className="w-5 h-5 text-rose-400 fill-rose-400/20" /> Sponsor Mutual Aid Reserve Pool
-              </h2>
-
-              {donated ? (
-                <div className="p-6 bg-rose-950/60 border border-rose-800 text-rose-200 rounded-2xl text-center space-y-3">
-                  <CheckCircle2 className="w-10 h-10 text-rose-400 mx-auto" />
-                  <h3 className="font-bold text-base text-white">Thank You, {currentUser.name}!</h3>
-                  <p className="text-xs text-slate-300">
-                    Your contribution of <strong>\${amount}</strong> has been credited to the Mutual Aid Pool, unlocking <strong>{Number(amount) * 60} Time Minutes</strong> of community care and food rescue.
-                  </p>
-                </div>
-              ) : (
-                <form onSubmit={handleDonate} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Select Patron Contribution (\$ USD)</label>
-                    <div className="grid grid-cols-4 gap-2 mb-2">
-                      {['25', '50', '100', '500'].map((val) => (
-                        <button 
-                          key={val} 
-                          type="button" 
-                          onClick={() => setAmount(val)} 
-                          className={`py-2 rounded-xl text-xs font-bold border transition ${
-                            amount === val 
-                              ? 'bg-rose-600 text-white border-rose-500' 
-                              : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
-                          }`}
-                        >
-                          \${val}
-                        </button>
-                      ))}
-                    </div>
-                    <input 
-                      type="number" 
-                      required 
-                      value={amount} 
-                      onChange={(e) => setAmount(e.target.value)} 
-                      placeholder="100" 
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-rose-500" 
-                    />
-                  </div>
-
-                  <button 
-                    type="submit" 
-                    className="w-full py-3 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-lg flex items-center justify-center gap-2"
-                  >
-                    Sponsor Mutual Aid Pool <Heart className="w-4 h-4 fill-white" />
-                  </button>
-                </form>
-              )}
-            </div>
-          ) : (
-            /* LOGGED-OUT PROMPT FOR REGISTRATION */
-            <div className="text-center space-y-4 py-4">
-              <Heart className="w-12 h-12 text-rose-400 mx-auto" />
-              <div className="space-y-1">
-                <h2 className="text-xl font-bold text-white">Patron Registration Required</h2>
-                <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                  To ensure 100% fund transparency and provide pseudonymous impact receipts, patrons must sign in or register an account first.
-                </p>
-              </div>
-
-              <a 
-                href="/auth" 
-                className="inline-flex items-center justify-center gap-2 w-full py-3.5 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-xl"
-              >
-                Register / Sign In as Patron Donor <ArrowRight className="w-4 h-4" />
-              </a>
+          {donationSuccess && (
+            <div className="p-4 bg-emerald-950/80 border border-emerald-800 text-emerald-200 rounded-2xl text-xs flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+              <span>Thank you for your donation! Your impact pass has been deployed to local community members.</span>
             </div>
           )}
+
+          <form onSubmit={handleDonationSubmit} className="space-y-5">
+            <div className="grid grid-cols-4 gap-2">
+              {[10, 25, 50, 100].map((amt) => (
+                <button
+                  key={amt}
+                  type="button"
+                  onClick={() => {
+                    setSelectedAmount(amt);
+                    setCustomAmount('');
+                  }}
+                  className={`py-3 rounded-2xl text-xs font-bold transition border ${
+                    selectedAmount === amt && !customAmount
+                      ? 'bg-rose-600 text-white border-rose-400 shadow-md'
+                      : 'bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-700'
+                  }`}
+                >
+                  ${amt}
+                </button>
+              ))}
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Or Enter Custom Amount ($ USD)</label>
+              <input 
+                type="number" 
+                value={customAmount} 
+                onChange={(e) => setCustomAmount(e.target.value)} 
+                placeholder="e.g. 250" 
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-rose-500" 
+              />
+            </div>
+
+            <div className="p-4 bg-rose-950/40 border border-rose-800/60 rounded-2xl text-xs text-rose-300 space-y-1">
+              <div className="font-bold text-sm text-white">Your Impact Multiplier (${activeAmount}):</div>
+              <div>• <strong>{Math.floor(activeAmount / 12)} Gourmet Meals</strong> rescued from restaurant surplus</div>
+              <div>• <strong>{Math.floor(activeAmount / 12)} Hours</strong> of neighborhood eldercare/tutoring mobilized</div>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Your Name</label>
+                <input 
+                  type="text" 
+                  required={!isAnonymous}
+                  disabled={isAnonymous}
+                  value={donorName} 
+                  onChange={(e) => setDonorName(e.target.value)} 
+                  placeholder="e.g. Marcus Tan" 
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-rose-500 disabled:opacity-50" 
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input 
+                  type="checkbox" 
+                  id="anon"
+                  checked={isAnonymous} 
+                  onChange={(e) => setIsAnonymous(e.target.checked)} 
+                  className="rounded bg-slate-950 border-slate-800 text-rose-600 focus:ring-rose-500" 
+                />
+                <label htmlFor="anon" className="text-xs text-slate-400">Donate anonymously</label>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Public Testimonial / Note (Optional)</label>
+                <textarea 
+                  rows={2}
+                  value={testimonial} 
+                  onChange={(e) => setTestimonial(e.target.value)} 
+                  placeholder="Share a word of encouragement for local community members..." 
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-rose-500 resize-none" 
+                />
+              </div>
+            </div>
+
+            <button 
+              type="submit" 
+              className="w-full py-3.5 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-lg flex items-center justify-center gap-2"
+            >
+              <Heart className="w-4 h-4 fill-white" /> Complete ${activeAmount} Micro-Donation
+            </button>
+          </form>
         </div>
       </div>
+
+      {/* MOBILE BOTTOM NAVIGATION BAR */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur border-t border-slate-800/80 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+        <div className="flex items-stretch justify-around px-2 pt-1.5 pb-2">
+          <a
+            href="/"
+            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-slate-400 hover:text-slate-200 transition-all flex-1"
+          >
+            <Clock className="w-5 h-5" />
+            <span className="text-[10px] tracking-tight">Home</span>
+          </a>
+
+          <a
+            href="/#directory"
+            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-slate-400 hover:text-slate-200 transition-all flex-1"
+          >
+            <SlidersHorizontal className="w-5 h-5" />
+            <span className="text-[10px] tracking-tight">Directory</span>
+          </a>
+
+          <a
+            href="/#directory"
+            className="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition-all flex-1"
+            title="Post Offer"
+          >
+            <div className="w-11 h-11 rounded-full bg-gradient-to-r from-rose-500 to-pink-600 flex items-center justify-center -mt-5 shadow-lg shadow-rose-500/40 ring-4 ring-slate-950">
+              <Plus className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-[10px] font-bold text-slate-400 mt-0.5">Post</span>
+          </a>
+
+          <a
+            href="/donors"
+            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-rose-400 font-bold transition-all flex-1"
+          >
+            <Heart className="w-5 h-5 scale-110 text-rose-400" />
+            <span className="text-[10px] tracking-tight">Donors</span>
+          </a>
+
+          <a
+            href="/auth"
+            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-slate-400 hover:text-cyan-400 transition-all flex-1"
+          >
+            <LogIn className="w-5 h-5" />
+            <span className="text-[10px] tracking-tight">Account</span>
+          </a>
+        </div>
+      </nav>
     </div>
   );
 }
