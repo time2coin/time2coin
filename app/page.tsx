@@ -7,10 +7,23 @@ import {
   RefreshCw, Sliders, ChevronRight, Utensils, Wifi, Building2, 
   SlidersHorizontal, Download, FileText, Users, HelpCircle, LogIn, LogOut, 
   MessageSquare, Quote, Globe, Plus, Store, LayoutDashboard, Send, TrendingUp,
-  Calculator, ArrowUpRight, Heart, Zap, Leaf, Shield, ChevronDown, Menu, X
+  Calculator, ArrowUpRight, Heart, Zap, Leaf, Shield, ChevronDown, Menu, X,
+  Image as ImageIcon, ZoomIn, Eye, Wrench, GraduationCap, Laptop, Palette, Car, Dog, HelpCircle as HelpIcon
 } from 'lucide-react';
 
 type TransactionStatus = 'REQUESTED' | 'HOLDING_LOCKED' | 'SERVICE_DELIVERED' | 'VERIFIED_AND_PAID' | 'RATED';
+
+export type CategoryType = 
+  | 'Food & Cooking'
+  | 'Home & DIY / Mechanical'
+  | 'Caregiving & Companionship'
+  | 'Gardening & Outdoor'
+  | 'Education & Skills'
+  | 'Technology & Digital'
+  | 'Arts, Crafts & Beauty'
+  | 'Transportation & Errands'
+  | 'Pet Care'
+  | 'Others';
 
 interface ServiceItem {
   id: string;
@@ -18,10 +31,12 @@ interface ServiceItem {
   providerRating: number;
   providerTrustScore: number;
   title: string;
-  category: 'Mechanical' | 'Caregiving' | 'Tutoring' | 'Gardening' | 'Food Rescue';
+  category: CategoryType;
   estimatedMinutes: number;
   description: string;
   isMerchantSurplus?: boolean;
+  isFree?: boolean;
+  photos?: string[];
 }
 
 interface Feature5Split {
@@ -50,15 +65,26 @@ export default function Time2CoinMainApp() {
   const [partnerMenuOpen, setPartnerMenuOpen] = useState<boolean>(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
+  // Lightbox Modal State for Enlarged Photo Focus View
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
   // Interactive Time Calculator State
   const [calcHours, setCalcHours] = useState<number>(2);
 
-  // Service Post Form State
+  // Service / Work Post Form State
   const [postTitle, setPostTitle] = useState('');
-  const [postCategory, setPostCategory] = useState<'Mechanical' | 'Caregiving' | 'Tutoring' | 'Gardening' | 'Food Rescue'>('Mechanical');
+  const [postCategory, setPostCategory] = useState<CategoryType>('Arts, Crafts & Beauty');
   const [postMinutes, setPostMinutes] = useState('60');
   const [postDescription, setPostDescription] = useState('');
+  const [postPhotos, setPostPhotos] = useState<string[]>([]);
   const [postSuccess, setPostSuccess] = useState(false);
+
+  // Pre-populated sample photos for skill showcase
+  const sampleSkillPhotos = [
+    'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=600&auto=format&fit=crop&q=80', // Nail art / Deco
+    'https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=600&auto=format&fit=crop&q=80', // Bicycle repair
+    'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=600&auto=format&fit=crop&q=80'  // Gardening
+  ];
 
   useEffect(() => {
     const saved = localStorage.getItem('time2coin_user');
@@ -73,49 +99,140 @@ export default function Time2CoinMainApp() {
     localStorage.removeItem('time2coin_user');
     setCurrentUser(null);
     setActiveTab('dashboard');
+    setMobileMenuOpen(false);
   };
 
   const [services, setServices] = useState<ServiceItem[]>([
     {
       id: 'srv-1',
+      providerName: 'Maya Lin',
+      providerRating: 5.0,
+      providerTrustScore: 100,
+      title: 'Custom Gel Nail Deco & Botanical Art',
+      category: 'Arts, Crafts & Beauty',
+      estimatedMinutes: 60,
+      description: 'Hand-painted nail deco art, extension care, and organic cuticle oil treatment. Photo portfolio attached below.',
+      photos: [
+        'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=600&auto=format&fit=crop&q=80'
+      ]
+    },
+    {
+      id: 'srv-2',
       providerName: 'Sarah Jenkins',
       providerRating: 4.9,
       providerTrustScore: 98,
       title: 'Bicycle Chain & Brake Repair',
-      category: 'Mechanical',
+      category: 'Home & DIY / Mechanical',
       estimatedMinutes: 60,
-      description: 'Full brake cable adjustment, chain lubrication, and safety check.'
+      description: 'Full brake cable adjustment, chain lubrication, and safety check.',
+      photos: [
+        'https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=600&auto=format&fit=crop&q=80'
+      ]
     },
     {
-      id: 'srv-2',
+      id: 'srv-3',
       providerName: 'David Chen',
       providerRating: 4.8,
       providerTrustScore: 94,
       title: 'Organic Garden Bed Setup',
-      category: 'Gardening',
+      category: 'Gardening & Outdoor',
       estimatedMinutes: 90,
-      description: 'Soil aerating, compost mixing, and seasonal vegetable planting.'
-    },
-    {
-      id: 'srv-3',
-      providerName: 'Elena Rostova',
-      providerRating: 5.0,
-      providerTrustScore: 100,
-      title: 'Elder Care Assistance & Companionship',
-      category: 'Caregiving',
-      estimatedMinutes: 120,
-      description: 'Grocery assistance, reading, and light home organization for seniors.'
+      description: 'Soil aerating, compost mixing, and seasonal vegetable planting.',
+      photos: [
+        'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=600&auto=format&fit=crop&q=80'
+      ]
     },
     {
       id: 'srv-4',
+      providerName: 'Green Garden Bakery (Merchant)',
+      providerRating: 5.0,
+      providerTrustScore: 100,
+      title: 'Artisan Sourdough & Fresh Pastry Box',
+      category: 'Food & Cooking',
+      estimatedMinutes: 0,
+      isFree: true,
+      description: 'Daily fresh-baked sourdough loaves and croissants. Offered 100% free for local families.',
+      isMerchantSurplus: true,
+      photos: [
+        'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&auto=format&fit=crop&q=80'
+      ]
+    },
+    {
+      id: 'srv-5',
+      providerName: 'Elena Rostova',
+      providerRating: 5.0,
+      providerTrustScore: 100,
+      title: 'Elder Care & Grocery Companionship',
+      category: 'Caregiving & Companionship',
+      estimatedMinutes: 120,
+      description: 'Companionship, reading, meal prep assistance, and grocery shopping for elderly neighbors.'
+    },
+    {
+      id: 'srv-6',
+      providerName: 'Kenji Sato',
+      providerRating: 4.9,
+      providerTrustScore: 97,
+      title: 'Conversational Japanese & Guitar Tutoring',
+      category: 'Education & Skills',
+      estimatedMinutes: 60,
+      description: 'Beginner to intermediate conversational Japanese practice or acoustic guitar chord fundamentals.'
+    },
+    {
+      id: 'srv-7',
+      providerName: 'Alex Rivera',
+      providerRating: 4.8,
+      providerTrustScore: 95,
+      title: 'Smartphone & Laptop Troubleshooting',
+      category: 'Technology & Digital',
+      estimatedMinutes: 45,
+      description: 'Data backup, app setup, malware cleaning, and Wi-Fi network configuration help.'
+    },
+    {
+      id: 'srv-8',
       providerName: 'Green Garden Bistro (Merchant)',
       providerRating: 4.9,
       providerTrustScore: 99,
-      title: '2x Gourmet Organic Surplus Lunch Boxes',
-      category: 'Food Rescue',
+      title: 'Gourmet Organic Bento Lunch Boxes',
+      category: 'Food & Cooking',
       estimatedMinutes: 45,
       description: 'Fresh chef-prepared artisan lunch meals prepared from daily surplus ingredients.',
-      isMerchantSurplus: true
+      isMerchantSurplus: true,
+      photos: [
+        'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=600&auto=format&fit=crop&q=80'
+      ]
+    },
+    {
+      id: 'srv-9',
+      providerName: 'Priya Sharma',
+      providerRating: 5.0,
+      providerTrustScore: 99,
+      title: 'Dog Walking & Weekend Pet Sitting',
+      category: 'Pet Care',
+      estimatedMinutes: 60,
+      description: 'Energetic dog walking, feeding, and home pet sitting for small to medium dogs.'
+    },
+    {
+      id: 'srv-10',
+      providerName: 'Marcus Vance',
+      providerRating: 4.9,
+      providerTrustScore: 98,
+      title: 'Neighborhood Senior Transportation & Errands',
+      category: 'Transportation & Errands',
+      estimatedMinutes: 45,
+      description: 'Local rides to medical appointments, pharmacy pickups, or community centers.'
+    },
+    {
+      id: 'srv-11',
+      providerName: 'Clara Oswald',
+      providerRating: 4.9,
+      providerTrustScore: 96,
+      title: 'Custom Upcycled Clothing Repair & Mending',
+      category: 'Others',
+      estimatedMinutes: 60,
+      description: 'Zipper replacement, denim patching, hem shortening, and creative upcycling for vintage clothes.'
     }
   ]);
 
@@ -138,11 +255,32 @@ export default function Time2CoinMainApp() {
   const [enteredPin, setEnteredPin] = useState<string>('');
   const [pinError, setPinError] = useState<boolean>(false);
 
+  const categoriesList: { name: string; icon: any; highlight?: boolean }[] = [
+    { name: 'All', icon: Sparkles },
+    { name: 'Food & Cooking', icon: Utensils, highlight: true },
+    { name: 'Home & DIY / Mechanical', icon: Wrench },
+    { name: 'Caregiving & Companionship', icon: HeartHandshake },
+    { name: 'Gardening & Outdoor', icon: Leaf },
+    { name: 'Education & Skills', icon: GraduationCap },
+    { name: 'Technology & Digital', icon: Laptop },
+    { name: 'Arts, Crafts & Beauty', icon: Palette },
+    { name: 'Transportation & Errands', icon: Car },
+    { name: 'Pet Care', icon: Dog },
+    { name: 'Others', icon: HelpIcon, highlight: true }
+  ];
+
   const testimonials = [
     {
+      name: 'Maya Lin',
+      role: 'Nail Deco Artist & Member',
+      quote: 'I listed my custom nail deco service under Arts & Beauty. Neighbors loved seeing my portfolio photos beforehand, and I earned 180 Time Minutes to redeem fresh sourdough bread!',
+      rating: 5,
+      badge: 'Verified Artist'
+    },
+    {
       name: 'Marcus Vance',
-      role: 'Local Bike Mechanic & Member',
-      quote: 'I fixed three bicycle chains in my neighborhood and earned 180 Time Minutes. I redeemed those credits for gourmet surplus meals from Green Garden Bistro without spending cash.',
+      role: 'Local Bike Mechanic',
+      quote: 'I fixed three bicycle chains in my neighborhood and earned 180 Time Minutes. I redeemed those credits for gourmet surplus meals without spending cash.',
       rating: 5,
       badge: 'Verified Member'
     },
@@ -152,20 +290,13 @@ export default function Time2CoinMainApp() {
       quote: 'The 4-digit verification PIN system makes every exchange transparent and reliable. I provided elder care for 2 hours and released funds instantly upon service completion.',
       rating: 5,
       badge: 'Trusted Caregiver'
-    },
-    {
-      name: 'Elena Rostova',
-      role: 'Organic Gardening Helper',
-      quote: '1 hour of my gardening help equals 1 hour of guitar lessons for my son. Equal time value gives everyone dignity regardless of conventional wage gaps.',
-      rating: 5,
-      badge: 'Top Member'
     }
   ];
 
   const liveActivityFeed = [
-    { user: 'Sarah J.', action: 'completed Bicycle Brake Repair for', value: '60 Time Minutes', time: '2 mins ago' },
-    { user: 'Green Garden Bistro', action: 'rescued 4 Surplus Meals for', value: '180 Time Minutes', time: '8 mins ago' },
-    { user: 'David C.', action: 'earned 90 Time Minutes in Gardening for', value: 'Elder Care Pass', time: '14 mins ago' }
+    { user: 'Maya L.', action: 'completed Gel Nail Deco for', value: '60 Time Minutes', time: '1 min ago' },
+    { user: 'Green Garden Bakery', action: 'offered FREE Sourdough Box for', value: '0 Time Minutes', time: '5 mins ago' },
+    { user: 'Sarah J.', action: 'completed Bicycle Brake Repair for', value: '60 Time Minutes', time: '12 mins ago' }
   ];
 
   const computeFeature5 = (grossMins: number): Feature5Split => {
@@ -181,24 +312,27 @@ export default function Time2CoinMainApp() {
       window.location.href = '/auth';
       return;
     }
-    if (walletBalance < service.estimatedMinutes) {
+    if (walletBalance < service.estimatedMinutes && !service.isFree) {
       alert("Insufficient Time Minutes in wallet balance!");
       return;
     }
 
-    const split = computeFeature5(service.estimatedMinutes);
+    const minsToLock = service.estimatedMinutes || 0;
+    const split = computeFeature5(minsToLock);
     const newJob: ActiveTransaction = {
       id: `tx-${Math.floor(1000 + Math.random() * 9000)}`,
       providerName: service.providerName,
       serviceTitle: service.title,
-      grossMinutes: service.estimatedMinutes,
+      grossMinutes: minsToLock,
       split,
       status: 'HOLDING_LOCKED',
       verificationPin: '4829',
       createdAt: 'Just now'
     };
 
-    setWalletBalance(prev => prev - service.estimatedMinutes);
+    if (minsToLock > 0) {
+      setWalletBalance(prev => prev - minsToLock);
+    }
     setActiveJob(newJob);
     setActiveTab('holding');
   };
@@ -217,6 +351,40 @@ export default function Time2CoinMainApp() {
     }, 1200);
   };
 
+  const handleAddSamplePhoto = (url: string) => {
+    if (postPhotos.length >= 3) {
+      alert('Maximum 3 photos allowed.');
+      return;
+    }
+    if (!postPhotos.includes(url)) {
+      setPostPhotos([...postPhotos, url]);
+    }
+  };
+
+  const handleRemovePhoto = (index: number) => {
+    setPostPhotos(postPhotos.filter((_, i) => i !== index));
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    if (postPhotos.length + files.length > 3) {
+      alert('Maximum 3 photos allowed.');
+      return;
+    }
+
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (reader.result) {
+          setPostPhotos(prev => [...prev, reader.result as string].slice(0, 3));
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleCreateOffer = (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) {
@@ -232,7 +400,8 @@ export default function Time2CoinMainApp() {
       title: postTitle,
       category: postCategory,
       estimatedMinutes: Number(postMinutes) || 60,
-      description: postDescription
+      description: postDescription,
+      photos: postPhotos.length > 0 ? postPhotos : undefined
     };
 
     setServices(prev => [newSrv, ...prev]);
@@ -241,6 +410,7 @@ export default function Time2CoinMainApp() {
       setPostSuccess(false);
       setPostTitle('');
       setPostDescription('');
+      setPostPhotos([]);
       setActiveTab('dashboard');
     }, 1500);
   };
@@ -321,8 +491,8 @@ export default function Time2CoinMainApp() {
                   <span className="text-xs font-bold text-white block">{currentUser.name}</span>
                   <span className="text-[10px] text-cyan-400 block">{currentUser.role}</span>
                 </div>
-                <button onClick={handleLogout} title="Logout" className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition ml-1">
-                  <LogOut className="w-3.5 h-3.5" />
+                <button onClick={handleLogout} title="Sign Out" className="p-1.5 bg-slate-800 hover:bg-slate-700 text-rose-400 hover:text-rose-300 rounded-lg transition ml-1 flex items-center gap-1 font-semibold text-xs">
+                  <LogOut className="w-3.5 h-3.5" /> Logout
                 </button>
               </div>
             ) : (
@@ -339,13 +509,25 @@ export default function Time2CoinMainApp() {
             )}
           </div>
 
-          {/* MOBILE HEADER CONTROLS (IPHONE / SMARTPHONE) */}
+          {/* MOBILE HEADER CONTROLS (IPHONE) */}
           <div className="flex lg:hidden items-center gap-2">
             {currentUser && (
               <div className="bg-cyan-950/80 border border-cyan-800/80 rounded-full px-2.5 py-1 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
                 <span className="font-extrabold text-xs text-cyan-300">{walletBalance}m</span>
               </div>
+            )}
+
+            {/* MOBILE LOGOUT BUTTON IN HEADER WHEN LOGGED IN */}
+            {currentUser && (
+              <button 
+                onClick={handleLogout}
+                className="p-1.5 px-2.5 rounded-xl bg-slate-900 border border-slate-800 text-rose-400 hover:text-rose-300 text-xs font-bold flex items-center gap-1"
+                title="Sign Out"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
             )}
 
             {/* MOBILE MENU TOGGLE BUTTON */}
@@ -359,12 +541,12 @@ export default function Time2CoinMainApp() {
           </div>
         </div>
 
-        {/* MOBILE MENU DRAWER (SLIDES DOWN ON IPHONE CLICK) */}
+        {/* MOBILE MENU DRAWER */}
         {mobileMenuOpen && (
           <div className="lg:hidden bg-slate-950 border-b border-slate-800 px-4 py-4 space-y-3 shadow-2xl animate-in slide-in-from-top duration-200">
             <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-1">Navigation</div>
             <div className="grid grid-cols-2 gap-2">
-              <a href="/" className="px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs font-bold text-cyan-300 flex items-center gap-1.5">
+              <a href="/" onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs font-bold text-cyan-300 flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-cyan-400" /> Home
               </a>
               <a href="#directory" onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs font-bold text-slate-300 flex items-center gap-1.5">
@@ -394,13 +576,24 @@ export default function Time2CoinMainApp() {
               </a>
             </div>
 
-            {!currentUser && (
-              <div className="pt-2">
-                <a href="/auth" className="w-full py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg">
+            {/* MOBILE SIGN IN / SIGN OUT BUTTON IN DRAWER */}
+            <div className="pt-2">
+              {currentUser ? (
+                <button 
+                  onClick={handleLogout} 
+                  className="w-full py-2.5 bg-rose-950/80 border border-rose-800 text-rose-300 hover:text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg"
+                >
+                  <LogOut className="w-4 h-4" /> Sign Out ({currentUser.name})
+                </button>
+              ) : (
+                <a 
+                  href="/auth" 
+                  className="w-full py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg"
+                >
                   <LogIn className="w-4 h-4" /> Register / Sign In
                 </a>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
       </header>
@@ -420,7 +613,7 @@ export default function Time2CoinMainApp() {
               </h1>
               
               <p className="text-xs sm:text-base text-slate-300 leading-relaxed max-w-2xl mx-auto">
-                1 Hour of your skill equals 1 Hour of someone else's help. Fix a bike, teach a language, or assist seniors—and redeem your earned Time Minutes for neighboring services or fresh restaurant surplus meals.
+                1 Hour of your skill equals 1 Hour of someone else's help. Showcase your nail deco art, mechanical repairs, or tutoring skills—and redeem earned Time Minutes or claim free community food.
               </p>
 
               <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
@@ -476,7 +669,7 @@ export default function Time2CoinMainApp() {
             <div className="max-w-4xl mx-auto flex items-center justify-center gap-3 text-center text-xs text-slate-300">
               <Quote className="w-4 h-4 text-cyan-400 shrink-0 hidden sm:inline" />
               <span>
-                <strong className="text-white">Marcus V.</strong> fixed 3 bicycle chains in his neighborhood and redeemed his earned Time Minutes for gourmet surplus meals from Green Garden Bistro—without cash.
+                <strong className="text-white">Maya L.</strong> showcased her custom gel nail deco art with photos, earned 180 Time Minutes, and redeemed fresh sourdough bread for her family!
               </span>
             </div>
           </section>
@@ -502,12 +695,21 @@ export default function Time2CoinMainApp() {
                   <p className="text-xs text-slate-400 mt-2">Earned via P2P labor • Redeemable anywhere for skills or surplus food</p>
                 </div>
 
-                <div className="bg-cyan-950/60 border border-cyan-800/50 rounded-2xl p-3 flex items-center gap-3 shrink-0">
-                  <Award className="w-7 h-7 text-cyan-400" />
-                  <div>
-                    <div className="text-xs text-slate-300 font-medium">Trust Score</div>
-                    <div className="text-xs sm:text-sm font-bold text-cyan-300">4.95 ★ (Top Tier)</div>
+                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3 shrink-0">
+                  <div className="bg-cyan-950/60 border border-cyan-800/50 rounded-2xl p-3 flex items-center gap-3">
+                    <Award className="w-7 h-7 text-cyan-400" />
+                    <div>
+                      <div className="text-xs text-slate-300 font-medium">Trust Score</div>
+                      <div className="text-xs sm:text-sm font-bold text-cyan-300">4.95 ★ (Top Tier)</div>
+                    </div>
                   </div>
+
+                  <button 
+                    onClick={handleLogout}
+                    className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-rose-400 hover:text-rose-300 rounded-2xl text-xs font-bold transition flex items-center gap-1.5 shadow-md"
+                  >
+                    <LogOut className="w-4 h-4" /> Sign Out
+                  </button>
                 </div>
               </div>
 
@@ -559,7 +761,7 @@ export default function Time2CoinMainApp() {
                 </div>
                 <h3 className="font-bold text-white text-base">Offer a Skill → Earn Minutes</h3>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  Fix a bicycle, teach guitar, garden, or care for elderly neighbors. 1 hour of labor earns 60 Time Minutes.
+                  Offer nail deco art, bicycle repair, gardening, tutoring, or pet care across 10 community categories. 1 hour = 60 Time Minutes.
                 </p>
               </div>
 
@@ -579,7 +781,7 @@ export default function Time2CoinMainApp() {
                 </div>
                 <h3 className="font-bold text-white text-base">Redeem Skills or Food</h3>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  Spend your earned Time Minutes on neighboring skills or claim fresh, chef-prepared surplus meals from local restaurant partners without cash.
+                  Spend earned Time Minutes on neighboring skills or claim fresh surplus food and 100% free community meals without cash.
                 </p>
               </div>
             </div>
@@ -647,32 +849,46 @@ export default function Time2CoinMainApp() {
           </section>
         )}
 
-        {/* PUBLIC & MEMBER LIVE MARKETPLACE */}
+        {/* PUBLIC & MEMBER LIVE MARKETPLACE WITH UPGRADED 10-CATEGORY FILTER BAR */}
         <section id="directory" className="space-y-6 scroll-mt-24">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
-            <div>
-              <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider">Live Marketplace</span>
-              <h2 className="text-xl sm:text-2xl font-black text-white mt-0.5">Explore Available Skills & Merchant Food Offers</h2>
-              <p className="text-xs text-slate-400 mt-1">Click on any offer below to redeem or book instantly.</p>
+          <div className="space-y-3 border-b border-slate-800 pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider">Live Marketplace</span>
+                <h2 className="text-xl sm:text-2xl font-black text-white mt-0.5">Explore Available Skills & Merchant Food Offers</h2>
+                <p className="text-xs text-slate-400 mt-1">Select from 10 standardized time bank categories below. Tap photos to enlarge.</p>
+              </div>
+              <span className="text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1 rounded-full self-start sm:self-auto">
+                {filteredServices.length} Listings Shown
+              </span>
             </div>
 
-            <div className="flex flex-wrap gap-1.5">
-              {['All', 'Mechanical', 'Caregiving', 'Gardening', 'Food Rescue'].map((cat) => (
-                <button 
-                  key={cat} 
-                  onClick={() => setSelectedCategory(cat)} 
-                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition ${
-                    selectedCategory === cat 
-                      ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-md' 
-                      : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
+            {/* 10-CATEGORY FILTER PILLS SCROLLABLE BAR */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none pt-2">
+              {categoriesList.map((cat) => {
+                const IconComponent = cat.icon;
+                const isSelected = selectedCategory === cat.name;
+                return (
+                  <button 
+                    key={cat.name} 
+                    onClick={() => setSelectedCategory(cat.name)} 
+                    className={`px-3 py-2 rounded-xl text-xs font-bold transition shrink-0 flex items-center gap-1.5 border ${
+                      isSelected 
+                        ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white border-cyan-400 shadow-md shadow-cyan-600/30' 
+                        : cat.highlight
+                          ? 'bg-amber-950/60 text-amber-300 border-amber-800/80 hover:bg-amber-900/80'
+                          : 'bg-slate-900 text-slate-400 hover:text-slate-200 border-slate-800 hover:border-slate-700'
+                    }`}
+                  >
+                    <IconComponent className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : cat.highlight ? 'text-amber-400' : 'text-slate-400'}`} />
+                    <span>{cat.name}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
+          {/* MARKETPLACE CARDS GRID */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
             {filteredServices.map((service) => (
               <div 
@@ -683,7 +899,7 @@ export default function Time2CoinMainApp() {
                     : 'bg-slate-950 border-slate-800 hover:border-cyan-500/60'
                 }`}
               >
-                <div>
+                <div className="space-y-3">
                   <div className="flex justify-between items-start mb-2">
                     <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${
                       service.isMerchantSurplus
@@ -692,15 +908,48 @@ export default function Time2CoinMainApp() {
                     }`}>
                       {service.isMerchantSurplus ? 'Merchant Surplus Food' : service.category}
                     </span>
+
                     <div className="text-right">
-                      <span className={`text-lg font-black ${service.isMerchantSurplus ? 'text-amber-300' : 'text-white'}`}>
-                        {service.estimatedMinutes}
-                      </span>
-                      <span className="text-xs text-slate-400 ml-1">Mins</span>
+                      {service.isFree ? (
+                        <span className="text-xs font-black text-emerald-300 bg-emerald-950 border border-emerald-800 px-2.5 py-1 rounded-full inline-flex items-center gap-1">
+                          <HeartHandshake className="w-3.5 h-3.5 text-emerald-400" /> FREE GIVE
+                        </span>
+                      ) : (
+                        <>
+                          <span className={`text-lg font-black ${service.isMerchantSurplus ? 'text-amber-300' : 'text-white'}`}>
+                            {service.estimatedMinutes}
+                          </span>
+                          <span className="text-xs text-slate-400 ml-1">Mins</span>
+                        </>
+                      )}
                     </div>
                   </div>
+
                   <h3 className="font-bold text-slate-100 text-base">{service.title}</h3>
-                  <p className="text-xs text-slate-300 leading-relaxed mt-2">{service.description}</p>
+                  <p className="text-xs text-slate-300 leading-relaxed">{service.description}</p>
+
+                  {/* SMALL PHOTO THUMBNAILS WITH CLICK TO ENLARGE LIGHTBOX */}
+                  {service.photos && service.photos.length > 0 && (
+                    <div className="pt-1">
+                      <span className="text-[10px] text-slate-400 block mb-1 font-semibold flex items-center gap-1">
+                        <Eye className="w-3 h-3 text-cyan-400" /> Showcase Photos ({service.photos.length}) — Tap to enlarge:
+                      </span>
+                      <div className="flex gap-2">
+                        {service.photos.map((imgUrl, idx) => (
+                          <div 
+                            key={idx} 
+                            onClick={() => setSelectedImage(imgUrl)}
+                            className="w-16 h-16 rounded-xl overflow-hidden border border-slate-700 bg-slate-900 cursor-pointer relative group shrink-0"
+                          >
+                            <img src={imgUrl} alt={`${service.title} photo ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition" />
+                            <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                              <ZoomIn className="w-4 h-4 text-white" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
@@ -737,49 +986,54 @@ export default function Time2CoinMainApp() {
           </div>
         </section>
 
-        {/* LOGGED-IN ONLY TAB: POST NEW OFFER FORM */}
+        {/* LOGGED-IN ONLY TAB: SUBMIT WORK / POST SKILL OFFER FORM WITH 10 CATEGORIES */}
         {currentUser && activeTab === 'post' && (
           <div className="bg-slate-950 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl max-w-xl mx-auto w-full space-y-5">
             <div>
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Plus className="w-5 h-5 text-cyan-400" /> Post a Service or Skill Offer
+                <Plus className="w-5 h-5 text-cyan-400" /> Submit Work / Post Skill Offer
               </h2>
-              <p className="text-xs text-slate-400 mt-1">Share your skills to earn Time Minutes from community neighbors.</p>
+              <p className="text-xs text-slate-400 mt-1">Select a category, describe your offer, and attach optional photos to earn Time Minutes.</p>
             </div>
 
             {postSuccess && (
               <div className="p-4 bg-emerald-950/80 border border-emerald-800 text-emerald-200 rounded-2xl text-xs flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-                <span>Service offer published successfully! Redirecting to community directory...</span>
+                <span>Work offer published successfully! Redirecting to marketplace...</span>
               </div>
             )}
 
             <form onSubmit={handleCreateOffer} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Service Title</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Service / Skill Title</label>
                 <input
                   type="text"
                   required
                   value={postTitle}
                   onChange={(e) => setPostTitle(e.target.value)}
-                  placeholder="e.g. Guitar Lessons / Plumbing Repair"
+                  placeholder="e.g. Custom Gel Nail Deco & Art / Bicycle Repair"
                   className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1">Category</label>
                   <select
                     value={postCategory}
-                    onChange={(e) => setPostCategory(e.target.value as any)}
+                    onChange={(e) => setPostCategory(e.target.value as CategoryType)}
                     className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500"
                   >
-                    <option value="Mechanical">Mechanical</option>
-                    <option value="Caregiving">Caregiving</option>
-                    <option value="Tutoring">Tutoring</option>
-                    <option value="Gardening">Gardening</option>
-                    <option value="Food Rescue">Food Rescue</option>
+                    <option value="Arts, Crafts & Beauty">Arts, Crafts & Beauty</option>
+                    <option value="Home & DIY / Mechanical">Home & DIY / Mechanical</option>
+                    <option value="Caregiving & Companionship">Caregiving & Companionship</option>
+                    <option value="Gardening & Outdoor">Gardening & Outdoor</option>
+                    <option value="Education & Skills">Education & Skills</option>
+                    <option value="Technology & Digital">Technology & Digital</option>
+                    <option value="Food & Cooking">Food & Cooking</option>
+                    <option value="Transportation & Errands">Transportation & Errands</option>
+                    <option value="Pet Care">Pet Care</option>
+                    <option value="Others">Others</option>
                   </select>
                 </div>
 
@@ -803,16 +1057,81 @@ export default function Time2CoinMainApp() {
                   rows={3}
                   value={postDescription}
                   onChange={(e) => setPostDescription(e.target.value)}
-                  placeholder="Describe what you will provide in detail..."
+                  placeholder="Describe what work or skill service you will provide in detail..."
                   className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500 resize-none"
                 />
               </div>
 
+              {/* WORK SHOWCASE PHOTO UPLOAD (OPTIONAL - MAX 3) */}
+              <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-3">
+                <div className="flex justify-between items-center">
+                  <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                    <ImageIcon className="w-4 h-4 text-cyan-400" /> Work Portfolio Photos (Optional, Max 3)
+                  </label>
+                  <span className="text-[10px] text-slate-400">{postPhotos.length}/3 attached</span>
+                </div>
+
+                {/* THUMBNAIL PREVIEW GRID */}
+                {postPhotos.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2 pt-1">
+                    {postPhotos.map((photo, idx) => (
+                      <div key={idx} className="relative group rounded-xl overflow-hidden border border-slate-700 bg-slate-950 aspect-square">
+                        <img src={photo} alt={`Work sample ${idx + 1}`} className="w-full h-full object-cover" />
+                        <button 
+                          type="button" 
+                          onClick={() => handleRemovePhoto(idx)}
+                          className="absolute top-1 right-1 bg-slate-950/80 hover:bg-rose-600 text-white rounded-full p-1 transition"
+                          title="Remove Photo"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {postPhotos.length < 3 && (
+                  <div className="space-y-2">
+                    <label className="block border-2 border-dashed border-slate-800 hover:border-cyan-500/60 rounded-xl p-3 text-center cursor-pointer transition bg-slate-950/50">
+                      <ImageIcon className="w-5 h-5 text-cyan-400 mx-auto mb-1" />
+                      <span className="text-xs font-semibold text-slate-300 block">Click to upload portfolio photos</span>
+                      <span className="text-[10px] text-slate-500 block">PNG, JPG, or WEBP up to 5MB</span>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        multiple 
+                        onChange={handleFileUpload} 
+                        className="hidden" 
+                      />
+                    </label>
+
+                    {/* QUICK SAMPLE SKILL PHOTO PICKER */}
+                    <div className="pt-1">
+                      <span className="text-[10px] text-slate-400 block mb-1">Or select sample skill photos to test:</span>
+                      <div className="flex gap-2">
+                        {sampleSkillPhotos.map((url, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => handleAddSamplePhoto(url)}
+                            className="w-12 h-12 rounded-lg overflow-hidden border border-slate-800 hover:border-cyan-400 transition shrink-0 relative"
+                            title="Add Sample Skill Photo"
+                          >
+                            <img src={url} alt="Sample skill" className="w-full h-full object-cover" />
+                            <Plus className="w-3.5 h-3.5 text-white bg-slate-950/70 rounded-full absolute bottom-0.5 right-0.5" />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <button
                 type="submit"
-                className="w-full py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-xs sm:text-sm rounded-xl transition flex items-center justify-center gap-2 shadow-lg"
+                className="w-full py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-lg flex items-center justify-center gap-2"
               >
-                <Send className="w-4 h-4" /> Publish Offer
+                <Send className="w-4 h-4" /> Submit & Publish Work Offer
               </button>
             </form>
           </div>
@@ -885,6 +1204,16 @@ export default function Time2CoinMainApp() {
                 <p className="text-xs text-slate-400">95% credited to {activeJob.providerName}, 5% routed to reserves.</p>
               </div>
             )}
+
+            {/* QUICK SIGN OUT FROM HOLDING VIEW */}
+            <div className="pt-4 border-t border-slate-800 text-center">
+              <button 
+                onClick={handleLogout}
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-rose-400 text-xs font-bold rounded-xl transition inline-flex items-center gap-1.5"
+              >
+                <LogOut className="w-3.5 h-3.5" /> Sign Out Account
+              </button>
+            </div>
           </div>
         )}
 
@@ -966,7 +1295,33 @@ export default function Time2CoinMainApp() {
 
       </div>
 
-      {/* MOBILE BOTTOM NAVIGATION BAR (IPHONE / SMARTPHONE) */}
+      {/* LIGHTBOX MODAL FOR ENLARGED PHOTO FOCUS VIEW */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div 
+            className="relative max-w-3xl max-h-[90vh] bg-slate-900 border border-slate-800 rounded-3xl p-2 shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setSelectedImage(null)}
+              className="absolute top-4 right-4 bg-slate-950/80 hover:bg-rose-600 text-white rounded-full p-2 transition z-10"
+              title="Close Image"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <img 
+              src={selectedImage} 
+              alt="Enlarged focus view" 
+              className="w-full h-auto max-h-[80vh] object-contain rounded-2xl"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* MOBILE BOTTOM NAVIGATION BAR */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur border-t border-slate-800/80 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
         <div className="flex items-stretch justify-around px-2 pt-1.5 pb-2">
           {/* HOME */}
@@ -980,7 +1335,7 @@ export default function Time2CoinMainApp() {
             <span className="text-[10px] tracking-tight">Home</span>
           </button>
 
-          {/* BROWSE SKILLS & FOOD */}
+          {/* BROWSE DIRECTORY */}
           <a
             href="#directory"
             className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl transition-all flex-1 text-slate-400 hover:text-slate-200"
@@ -989,7 +1344,27 @@ export default function Time2CoinMainApp() {
             <span className="text-[10px] tracking-tight">Directory</span>
           </a>
 
-          {/* PARTNERS DRAWER TOGGLE (IPHONE ACCESS POINT) */}
+          {/* RAISED CENTER + POST BUTTON (FOR SUBMITTING WORK / SKILL OFFERS) */}
+          <button
+            onClick={() => {
+              if (!currentUser) {
+                window.location.href = '/auth';
+              } else {
+                setActiveTab('post');
+              }
+            }}
+            className="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition-all flex-1"
+            title="Submit Work / Post Skill"
+          >
+            <div className="w-11 h-11 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center -mt-5 shadow-lg shadow-cyan-500/40 ring-4 ring-slate-950">
+              <Plus className="w-6 h-6 text-white" />
+            </div>
+            <span className={`text-[10px] font-bold mt-0.5 ${activeTab === 'post' ? 'text-cyan-400' : 'text-slate-400'}`}>
+              Post
+            </span>
+          </button>
+
+          {/* PARTNERS MENU TOGGLE */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-amber-400 hover:text-amber-300 transition-all flex-1"
@@ -998,17 +1373,7 @@ export default function Time2CoinMainApp() {
             <span className="text-[10px] font-bold tracking-tight">Partners</span>
           </button>
 
-          {/* FOOD RESCUE QUICK NAV */}
-          <a
-            href="#directory"
-            onClick={() => setSelectedCategory('Food Rescue')}
-            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl transition-all flex-1 text-slate-400 hover:text-amber-400"
-          >
-            <Utensils className="w-5 h-5 transition-transform" />
-            <span className="text-[10px] tracking-tight">Food</span>
-          </a>
-
-          {/* CONDITIONAL TAB: HOLDING (LOGGED-IN) vs SIGN IN (LOGGED-OUT) */}
+          {/* CONDITIONAL TAB: HOLDING / SIGN OUT (LOGGED IN) vs SIGN IN (LOGGED OUT) */}
           {currentUser ? (
             <button
               onClick={() => setActiveTab('holding')}
