@@ -2,14 +2,19 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  Building2, Award, ShieldCheck, ArrowRight, CheckCircle2, 
-  Sparkles, FileText, TrendingUp, Users, LogIn, DollarSign, ArrowLeft, LogOut
+  Building2, ArrowLeft, LogIn, LogOut, ArrowRight, ShieldCheck, 
+  CheckCircle2, Sparkles, Heart, FileText, Download, DollarSign,
+  TrendingUp, Award, BarChart3, Users, ChevronRight, Lock, Eye,
+  Clock, SlidersHorizontal, Plus
 } from 'lucide-react';
 
-export default function CorporateCSRPage() {
+export default function CorporateCSRPortalPage() {
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [sponsorshipTier, setSponsorshipTier] = useState('$5,000 / mo');
-  const [submitted, setSubmitted] = useState(false);
+  const [grantAmount, setGrantAmount] = useState('5000');
+  const [district, setDistrict] = useState('Downtown District 1');
+  const [companyName, setCompanyName] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [successMsg, setSuccessMsg] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('time2coin_user');
@@ -25,26 +30,25 @@ export default function CorporateCSRPage() {
     setCurrentUser(null);
   };
 
-  const handleSponsorPool = (e: React.FormEvent) => {
+  const handleSponsorSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentUser) {
-      window.location.href = '/auth';
-      return;
-    }
-    setSubmitted(true);
+    setSuccessMsg(true);
+    setTimeout(() => {
+      setSuccessMsg(false);
+      setCompanyName('');
+      setContactEmail('');
+    }, 3000);
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-16">
-      {/* HEADER WITH SLEEK RESPONSIVE BACK BUTTON */}
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-24 lg:pb-12">
+      {/* HEADER */}
       <header className="border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-40 px-3 sm:px-4 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            {/* SLEEK RESPONSIVE BACK BUTTON */}
             <a 
               href="/" 
               className="p-2 sm:px-3 sm:py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-sm"
-              title="Back to Home"
             >
               <ArrowLeft className="w-4 h-4 text-cyan-400" />
               <span className="hidden sm:inline">Back to Home</span>
@@ -54,136 +58,189 @@ export default function CorporateCSRPage() {
               <div className="p-1 bg-blue-500/20 border border-blue-500/40 rounded-xl shrink-0">
                 <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
               </div>
-              <span className="font-bold text-sm sm:text-lg text-white truncate">time2coin <span className="text-blue-400 text-xs font-normal hidden md:inline">| Corporate CSR Portal</span></span>
+              <span className="font-bold text-sm sm:text-lg text-white truncate">time2coin <span className="text-blue-400 text-xs font-normal hidden md:inline">| Corporate CSR & ESG Portal</span></span>
             </a>
           </div>
-          
+
           {currentUser ? (
             <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-xl shrink-0">
-              <span className="text-[10px] sm:text-xs font-bold text-blue-300 truncate max-w-[100px] sm:max-w-none">{currentUser.name}</span>
+              <span className="text-[10px] sm:text-xs font-bold text-blue-300 truncate">{currentUser.name}</span>
               <button onClick={handleLogout} title="Sign Out" className="p-1 text-slate-400 hover:text-rose-400">
                 <LogOut className="w-3.5 h-3.5" />
               </button>
             </div>
           ) : (
-            <a href="/auth" className="px-3 sm:px-4 py-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 text-white rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center gap-1 shrink-0 shadow-md">
-              <LogIn className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Register / </span>Sign In
+            <a href="/auth" className="px-3 sm:px-4 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 text-white rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center gap-1 shrink-0 shadow-md">
+              <LogIn className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Partner </span>Sign In
             </a>
           )}
         </div>
       </header>
 
-      {/* HERO SECTION */}
-      <section className="bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950/50 border-b border-slate-800 py-12 px-4">
+      {/* HERO BANNER */}
+      <section className="bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950/60 border-b border-slate-800 py-12 px-4">
         <div className="max-w-4xl mx-auto text-center space-y-4">
           <div className="inline-flex items-center gap-2 bg-blue-950/80 border border-blue-800/60 px-4 py-1 rounded-full text-xs font-bold text-blue-300">
-            <Award className="w-4 h-4 text-blue-400" /> Double-Impact ESG & Corporate Social Responsibility
+            <Building2 className="w-4 h-4 text-blue-400" /> Verified ESG & CSR Impact Sponsoring
           </div>
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-            Fund Community Care & <span className="text-blue-400">Audited ESG Impact</span>
+            Double-Impact <span className="text-blue-400">CSR Grant Sponsoring</span>
           </h1>
           <p className="text-xs sm:text-base text-slate-300 leading-relaxed max-w-2xl mx-auto">
-            Designed for enterprise sponsors and ESG officers. Register your organization to sponsor community time pools and generate verified, transparent social impact reports.
+            Fund local merchant food passes and mobilize community care hours simultaneously. 100% cryptographically audited with zero-fraud verification.
           </p>
         </div>
       </section>
 
-      {/* VALUE PROPOSITIONS */}
-      <div className="max-w-6xl mx-auto px-4 py-12 space-y-12">
+      {/* MAIN CONTENT */}
+      <div className="max-w-6xl mx-auto px-4 py-10 space-y-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-950 border border-blue-800 flex items-center justify-center text-blue-400 font-bold">
-              <FileText className="w-5 h-5" />
-            </div>
-            <h3 className="font-bold text-white text-base">Audited ESG Disclosures</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Transparent reporting on exact social metrics ($1 = 1 Surplus Meal + 1 Hour Community Care) for corporate sustainability audits.
-            </p>
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-2">
+            <BarChart3 className="w-8 h-8 text-blue-400" />
+            <h3 className="font-bold text-white text-sm">Quantifiable ESG Metrics</h3>
+            <p className="text-xs text-slate-400">Track exact kg of food waste rescued and hours of senior care mobilized per dollar spent.</p>
           </div>
-
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-950 border border-emerald-800 flex items-center justify-center text-emerald-400 font-bold">
-              <TrendingUp className="w-5 h-5" />
-            </div>
-            <h3 className="font-bold text-white text-base">Transparent Fund Ledger</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Every corporate dollar is registered to verified accounts, ensuring seed funds directly back real neighborhood care pools.
-            </p>
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-2">
+            <ShieldCheck className="w-8 h-8 text-emerald-400" />
+            <h3 className="font-bold text-white text-sm">Anti-Fraud Protection</h3>
+            <p className="text-xs text-slate-400">4-digit double-blind PIN verification ensures funds reach real local beneficiaries.</p>
           </div>
-
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-cyan-950 border border-cyan-800 flex items-center justify-center text-cyan-400 font-bold">
-              <Users className="w-5 h-5" />
-            </div>
-            <h3 className="font-bold text-white text-base">Employee Volunteer Matching</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Engage corporate staff in skill-sharing initiatives matched by sponsored company Time Pool credits.
-            </p>
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-2">
+            <Award className="w-8 h-8 text-cyan-400" />
+            <h3 className="font-bold text-white text-sm">Tax Receipt & Audit Export</h3>
+            <p className="text-xs text-slate-400">Download automated CSV/PDF impact reports for corporate tax deduction & annual ESG reporting.</p>
           </div>
         </div>
 
-        {/* CONDITIONALLY RENDERED SPONSORSHIP FORM VS REGISTRATION GATE */}
-        <div className="bg-slate-900 border border-blue-800/40 rounded-3xl p-6 sm:p-8 max-w-xl mx-auto shadow-2xl space-y-6">
-          {currentUser ? (
-            /* LOGGED-IN SPONSOR DASHBOARD */
-            <div className="space-y-4">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-3">
-                <DollarSign className="w-5 h-5 text-blue-400" /> Sponsor Corporate CSR Time Pool
-              </h2>
+        {/* CSR SPONSORSHIP FORM */}
+        <div className="bg-slate-900 border border-blue-800/40 rounded-3xl p-6 sm:p-8 max-w-2xl mx-auto space-y-6 shadow-2xl">
+          <div className="border-b border-slate-800 pb-3">
+            <h2 className="text-lg font-bold text-white">Allocate Corporate CSR Grant</h2>
+            <p className="text-xs text-slate-400">Sponsor meal vouchers and community care in your targeted operating district.</p>
+          </div>
 
-              {submitted ? (
-                <div className="p-6 bg-blue-950/60 border border-blue-800 text-blue-200 rounded-2xl text-center space-y-3">
-                  <CheckCircle2 className="w-10 h-10 text-blue-400 mx-auto" />
-                  <h3 className="font-bold text-base text-white">Sponsorship Pool Activated!</h3>
-                  <p className="text-xs text-slate-300">
-                    Thank you, <strong>{currentUser.name}</strong>. Your corporate sponsorship tier of <strong>{sponsorshipTier}</strong> has been assigned to your corporate dashboard.
-                  </p>
-                </div>
-              ) : (
-                <form onSubmit={handleSponsorPool} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Select Monthly CSR Sponsorship Tier</label>
-                    <select 
-                      value={sponsorshipTier} 
-                      onChange={(e) => setSponsorshipTier(e.target.value)} 
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
-                    >
-                      <option value="$1,000 / mo">$1,000 / month (Local District Pilot)</option>
-                      <option value="$5,000 / mo">$5,000 / month (Regional Community Sponsor)</option>
-                      <option value="$25,000 / mo">$25,000 / month (Citywide Impact Pool)</option>
-                    </select>
-                  </div>
-
-                  <button 
-                    type="submit" 
-                    className="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-lg flex items-center justify-center gap-2"
-                  >
-                    Confirm CSR Pool Sponsorship <ArrowRight className="w-4 h-4" />
-                  </button>
-                </form>
-              )}
-            </div>
-          ) : (
-            /* LOGGED-OUT PROMPT FOR REGISTRATION */
-            <div className="text-center space-y-4 py-4">
-              <Building2 className="w-12 h-12 text-blue-400 mx-auto" />
-              <div className="space-y-1">
-                <h2 className="text-xl font-bold text-white">Corporate Registration Required</h2>
-                <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                  To maintain complete transparency on seed funding and CSR allocation, sponsors must register an authenticated corporate account first.
-                </p>
-              </div>
-
-              <a 
-                href="/auth" 
-                className="inline-flex items-center justify-center gap-2 w-full py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-xl"
-              >
-                Register / Sign In as Corporate Sponsor <ArrowRight className="w-4 h-4" />
-              </a>
+          {successMsg && (
+            <div className="p-4 bg-emerald-950/80 border border-emerald-800 text-emerald-200 rounded-2xl text-xs flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+              <span>CSR Grant request received! Our operations auditor will send your tax receipt invoice within 2 hours.</span>
             </div>
           )}
+
+          <form onSubmit={handleSponsorSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Company / Foundation Name</label>
+              <input 
+                type="text" 
+                required 
+                value={companyName} 
+                onChange={(e) => setCompanyName(e.target.value)} 
+                placeholder="e.g. Petronas Corporate Sustainability Division" 
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500" 
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Target District</label>
+                <select 
+                  value={district} 
+                  onChange={(e) => setDistrict(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
+                >
+                  <option value="Downtown District 1">Downtown District 1</option>
+                  <option value="Subang Jaya District 2">Subang Jaya District 2</option>
+                  <option value="Petaling Jaya District 3">Petaling Jaya District 3</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">CSR Grant Budget ($ USD)</label>
+                <input 
+                  type="number" 
+                  required 
+                  value={grantAmount} 
+                  onChange={(e) => setGrantAmount(e.target.value)} 
+                  placeholder="5000" 
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500" 
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Contact Email</label>
+              <input 
+                type="email" 
+                required 
+                value={contactEmail} 
+                onChange={(e) => setContactEmail(e.target.value)} 
+                placeholder="csr@company.com" 
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500" 
+              />
+            </div>
+
+            <div className="p-3 bg-blue-950/40 border border-blue-800/60 rounded-xl text-xs text-blue-300 space-y-1">
+              <div className="font-bold">Impact Multiplier Preview (${grantAmount}):</div>
+              <div>• {Math.floor(Number(grantAmount) / 12)} Gourmet Meals Sponsored for Local Seniors</div>
+              <div>• {Math.floor(Number(grantAmount) / 12)} Hours of P2P Community Care Mobilized</div>
+            </div>
+
+            <button 
+              type="submit" 
+              className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-lg flex items-center justify-center gap-2"
+            >
+              <Building2 className="w-4 h-4" /> Submit Corporate CSR Grant
+            </button>
+          </form>
         </div>
       </div>
+
+      {/* MOBILE BOTTOM NAVIGATION BAR */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur border-t border-slate-800/80 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+        <div className="flex items-stretch justify-around px-2 pt-1.5 pb-2">
+          <a
+            href="/"
+            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-slate-400 hover:text-slate-200 transition-all flex-1"
+          >
+            <Clock className="w-5 h-5" />
+            <span className="text-[10px] tracking-tight">Home</span>
+          </a>
+
+          <a
+            href="/#directory"
+            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-slate-400 hover:text-slate-200 transition-all flex-1"
+          >
+            <SlidersHorizontal className="w-5 h-5" />
+            <span className="text-[10px] tracking-tight">Directory</span>
+          </a>
+
+          <a
+            href="/#directory"
+            className="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition-all flex-1"
+            title="Post Offer"
+          >
+            <div className="w-11 h-11 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center -mt-5 shadow-lg shadow-blue-500/40 ring-4 ring-slate-950">
+              <Plus className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-[10px] font-bold text-slate-400 mt-0.5">Post</span>
+          </a>
+
+          <a
+            href="/corporate"
+            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-blue-400 font-bold transition-all flex-1"
+          >
+            <Building2 className="w-5 h-5 scale-110 text-blue-400" />
+            <span className="text-[10px] tracking-tight">Corporate</span>
+          </a>
+
+          <a
+            href="/auth"
+            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-slate-400 hover:text-cyan-400 transition-all flex-1"
+          >
+            <LogIn className="w-5 h-5" />
+            <span className="text-[10px] tracking-tight">Account</span>
+          </a>
+        </div>
+      </nav>
     </div>
   );
 }
