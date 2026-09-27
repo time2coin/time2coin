@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Building2, Award, ShieldCheck, ArrowRight, CheckCircle2, 
-  Sparkles, FileText, TrendingUp, Users, LogIn, DollarSign, ArrowLeft
+  Sparkles, FileText, TrendingUp, Users, LogIn, DollarSign, ArrowLeft, LogOut
 } from 'lucide-react';
 
 export default function CorporateCSRPage() {
@@ -20,6 +20,11 @@ export default function CorporateCSRPage() {
     }
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem('time2coin_user');
+    setCurrentUser(null);
+  };
+
   const handleSponsorPool = (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) {
@@ -31,33 +36,38 @@ export default function CorporateCSRPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-16">
-      {/* HEADER WITH PROMINENT BACK TO HOME BUTTON */}
-      <header className="border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-40 px-4 py-3">
+      {/* HEADER WITH SLEEK RESPONSIVE BACK BUTTON */}
+      <header className="border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-40 px-3 sm:px-4 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
-          <div className="flex items-center gap-3">
-            {/* PROMINENT BACK TO HOME BUTTON */}
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            {/* SLEEK RESPONSIVE BACK BUTTON */}
             <a 
               href="/" 
-              className="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
+              className="p-2 sm:px-3 sm:py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-sm"
+              title="Back to Home"
             >
-              <ArrowLeft className="w-4 h-4 text-cyan-400" /> Back to Home
+              <ArrowLeft className="w-4 h-4 text-cyan-400" />
+              <span className="hidden sm:inline">Back to Home</span>
             </a>
 
-            <a href="/" className="flex items-center gap-2">
-              <div className="p-1 bg-blue-500/20 border border-blue-500/40 rounded-xl">
-                <Building2 className="w-5 h-5 text-blue-400" />
+            <a href="/" className="flex items-center gap-2 min-w-0 truncate">
+              <div className="p-1 bg-blue-500/20 border border-blue-500/40 rounded-xl shrink-0">
+                <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
               </div>
-              <span className="font-bold text-lg text-white">time2coin <span className="text-blue-400 text-xs font-normal hidden sm:inline">| Corporate CSR Portal</span></span>
+              <span className="font-bold text-sm sm:text-lg text-white truncate">time2coin <span className="text-blue-400 text-xs font-normal hidden md:inline">| Corporate CSR Portal</span></span>
             </a>
           </div>
           
           {currentUser ? (
-            <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1 rounded-xl">
-              <span className="text-xs font-bold text-blue-300">{currentUser.name} (Corporate Sponsor)</span>
+            <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-xl shrink-0">
+              <span className="text-[10px] sm:text-xs font-bold text-blue-300 truncate max-w-[100px] sm:max-w-none">{currentUser.name}</span>
+              <button onClick={handleLogout} title="Sign Out" className="p-1 text-slate-400 hover:text-rose-400">
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
             </div>
           ) : (
-            <a href="/auth" className="px-4 py-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md">
-              <LogIn className="w-3.5 h-3.5" /> Register / Sign In
+            <a href="/auth" className="px-3 sm:px-4 py-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 text-white rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center gap-1 shrink-0 shadow-md">
+              <LogIn className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Register / </span>Sign In
             </a>
           )}
         </div>
