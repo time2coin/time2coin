@@ -1,5 +1,6 @@
 'use client';
 
+import CountrySelector from '@/components/CountrySelector';
 import React, { useState, useEffect } from 'react';
 import { 
   Clock, ShieldCheck, HeartHandshake, Award, QrCode, Star, Lock, 
@@ -442,6 +443,30 @@ export default function Time2CoinMainApp() {
             </div>
           </a>
 
+          {/* TOP NAVIGATION HEADER */}
+<header className="border-b border-slate-800 bg-slate-950/95 backdrop-blur sticky top-0 z-40 w-full">
+  <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-2 w-full">
+    
+    {/* LOGO & BRANDING */}
+    <a href="/" className="flex items-center gap-3 min-w-0 group">
+      ...
+    </a>
+
+    {/* 🖥️ DESKTOP TOP NAV LINKS */}
+    <div className="hidden lg:flex items-center gap-2 shrink-0">
+      <a href="/" className="px-3 py-1.5 text-cyan-300 font-semibold text-xs bg-cyan-950/80 border border-cyan-800/80 rounded-lg">
+        Home
+      </a>
+      
+      {/* 📍 ADD COUNTRY SELECTOR HERE FOR DESKTOP */}
+      <CountrySelector userJurisdictionId={currentUser?.jurisdiction_id} />
+
+      <a href="#directory" className="px-3 py-1.5 text-slate-300 hover:text-white rounded-lg text-xs font-semibold transition">
+        Services & Food
+      </a>
+      ...
+    </div>
+    
           {/* DESKTOP TOP NAV LINKS */}
           <div className="hidden lg:flex items-center gap-2 shrink-0">
             <a href="/" className="px-3 py-1.5 text-cyan-300 font-semibold text-xs bg-cyan-950/80 border border-cyan-800/80 rounded-lg">
@@ -517,6 +542,19 @@ export default function Time2CoinMainApp() {
                 <span className="font-extrabold text-xs text-cyan-300">{walletBalance}m</span>
               </div>
             )}
+
+                {/* 📱 MOBILE HEADER CONTROLS (IPHONE / ANDROID) */}
+    <div className="flex lg:hidden items-center gap-2">
+      
+      {/* 📍 ADD COUNTRY SELECTOR HERE FOR MOBILE */}
+      <CountrySelector userJurisdictionId={currentUser?.jurisdiction_id} />
+
+      {currentUser && (
+        <div className="bg-cyan-950/80 border border-cyan-800/80 rounded-full px-2.5 py-1 flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+          <span className="font-extrabold text-xs text-cyan-300">{walletBalance}m</span>
+        </div>
+      )}
 
             {/* MOBILE LOGOUT BUTTON IN HEADER WHEN LOGGED IN */}
             {currentUser && (
