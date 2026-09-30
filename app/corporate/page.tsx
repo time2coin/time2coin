@@ -1,3 +1,5 @@
+import CountrySelector from "@/components/CountrySelector";
+import { SUPPORTED_JURISDICTIONS, Jurisdiction } from "@/lib/jurisdictions";
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -15,6 +17,20 @@ export default function CorporateCSRPortalPage() {
   const [companyName, setCompanyName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
   const [successMsg, setSuccessMsg] = useState(false);
+  const [selectedJurisdiction, setSelectedJurisdiction] = useState<Jurisdiction>(SUPPORTED_JURISDICTIONS['MY-MYR']);
+
+  useEffect(() => {
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+      return null;
+    };
+    const savedId = getCookie('time2coin_jurisdiction') || currentUser?.jurisdiction_id || 'MY-MYR';
+    if (SUPPORTED_JURISDICTIONS[savedId]) {
+      setSelectedJurisdiction(SUPPORTED_JURISDICTIONS[savedId]);
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     const saved = localStorage.getItem('time2coin_user');
@@ -61,6 +77,11 @@ export default function CorporateCSRPortalPage() {
               <span className="font-bold text-sm sm:text-lg text-white truncate">time2coin <span className="text-blue-400 text-xs font-normal hidden md:inline">| Corporate CSR & ESG Portal</span></span>
             </a>
           </div>
+
+                    <CountrySelector 
+            userJurisdictionId={currentUser?.jurisdiction_id} 
+            onJurisdictionChange={(j) => setSelectedJurisdiction(SUPPORTED_JURISDICTIONS[j.id] || SUPPORTED_JURISDICTIONS['MY-MYR'])}
+          />
 
           {currentUser ? (
             <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-xl shrink-0">
@@ -154,7 +175,7 @@ export default function CorporateCSRPortalPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">CSR Grant Budget ($ USD)</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">CSR Grant Budget ({selectedJurisdiction.currencySymbol} {selectedJurisdiction.currencyCode})</label>
                 <input 
                   type="number" 
                   required 
@@ -179,9 +200,9 @@ export default function CorporateCSRPortalPage() {
             </div>
 
             <div className="p-3 bg-blue-950/40 border border-blue-800/60 rounded-xl text-xs text-blue-300 space-y-1">
-              <div className="font-bold">Impact Multiplier Preview (${grantAmount}):</div>
-              <div>• {Math.floor(Number(grantAmount) / 12)} Gourmet Meals Sponsored for Local Seniors</div>
-              <div>• {Math.floor(Number(grantAmount) / 12)} Hours of P2P Community Care Mobilized</div>
+              <div className="font-bold">Impact Multiplier Preview ({selectedJurisdiction.currencySymbol}{grantAmount}):</div>
+              <div>• {Math.floor(Number(grantAmount) / selectedJurisdiction.localMealCostFiat)} Gourmet Meals Sponsored for Local Seniors</div>
+              <div>• {Math.floor(Number(grantAmount) / selectedJurisdiction.localMealCostFiat)} Hours of P2P Community Care Mobilized</div>
             </div>
 
             <button 
