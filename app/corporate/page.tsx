@@ -1,7 +1,7 @@
 'use client';
+import React, { useState, useEffect } from 'react';
 import CountrySelector from '@/components/CountrySelector';
 import { SUPPORTED_JURISDICTIONS, formatLocalCurrency } from '@/lib/jurisdictions';
-import React, { useState, useEffect } from 'react';
 import { 
   Building2, ArrowLeft, LogIn, LogOut, ArrowRight, ShieldCheck, 
   CheckCircle2, Sparkles, Heart, FileText, Download, DollarSign,
@@ -16,13 +16,30 @@ export default function CorporateCSRPortalPage() {
   const [companyName, setCompanyName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
   const [successMsg, setSuccessMsg] = useState(false);
+  const [userJurisdiction, setUserJurisdiction] = useState('MY-MYR');
 
   useEffect(() => {
     const saved = localStorage.getItem('time2coin_user');
     if (saved) {
       try {
-        setCurrentUser(JSON.parse(saved));
+        const u = JSON.parse(saved);
+        setCurrentUser(u);
+        if (u.jurisdiction_id) {
+          setUserJurisdiction(u.jurisdiction_id);
+        }
       } catch (e) {}
+    }
+
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+      return null;
+    };
+
+    const savedJurisdiction = getCookie('time2coin_jurisdiction');
+    if (savedJurisdiction && SUPPORTED_JURISDICTIONS[savedJurisdiction]) {
+      setUserJurisdiction(savedJurisdiction);
     }
   }, []);
 
@@ -41,15 +58,15 @@ export default function CorporateCSRPortalPage() {
     }, 3000);
   };
 
-  const userJurisdiction = currentUser?.jurisdiction_id || 'MY-MYR';
   const currentConfig = SUPPORTED_JURISDICTIONS[userJurisdiction] || SUPPORTED_JURISDICTIONS['MY-MYR'];
+  const numericGrant = Number(grantAmount) || 0;
+  const sponsoredMeals = Math.floor(numericGrant / (currentConfig.localMealCostFiat || 6));
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-24 lg:pb-12">
       {/* HEADER WITH UNIFORM RIGHT-ALIGNED COUNTRY SELECTOR */}
       <header className="border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-40 px-3 sm:px-4 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
-          {/* LEFT: BACK BUTTON & BRANDING */}
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <a 
               href="/" 
@@ -67,13 +84,15 @@ export default function CorporateCSRPortalPage() {
             </a>
           </div>
 
-          {/* RIGHT: COUNTRY SELECTOR & ACCOUNT CONTROLS */}
           <div className="flex items-center gap-2 shrink-0">
-            <CountrySelector userJurisdictionId={currentUser?.jurisdiction_id} />
+            <CountrySelector 
+              userJurisdictionId={currentUser?.jurisdiction_id} 
+              onJurisdictionChange={(j) => setUserJurisdiction(j.id)}
+            />
 
             {currentUser ? (
               <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-xl shrink-0">
-                <span className="text-[10px] sm:text-xs font-bold text-blue-300 truncate max-w-[100px] sm:max-w-none">{currentUser.name}</span>
+                <span className="text-[10px] sm:text-xs font-bold text-blue-300 truncate">{currentUser.name}</span>
                 <button onClick={handleLogout} title="Sign Out" className="p-1 text-slate-400 hover:text-rose-400">
                   <LogOut className="w-3.5 h-3.5" />
                 </button>
@@ -164,7 +183,9 @@ export default function CorporateCSRPortalPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">CSR Grant Budget ({currentConfig.currencySymbol})</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  CSR Grant Budget ({currentConfig.currencySymbol} {currentConfig.currencyCode})
+                </label>
                 <input 
                   type="number" 
                   required 
@@ -189,9 +210,11 @@ export default function CorporateCSRPortalPage() {
             </div>
 
             <div className="p-3 bg-blue-950/40 border border-blue-800/60 rounded-xl text-xs text-blue-300 space-y-1">
-              <div className="font-bold">Impact Multiplier Preview ({formatLocalCurrency(Number(grantAmount) || 0, userJurisdiction)}):</div>
-              <div>• {Math.floor((Number(grantAmount) || 0) / currentConfig.localMealCostFiat)} Gourmet Meals Sponsored for Local Seniors</div>
-              <div>• {Math.floor((Number(grantAmount) || 0) / currentConfig.localMealCostFiat)} Hours of P2P Community Care Mobilized</div>
+              <div className="font-bold">
+                Impact Multiplier Preview ({formatLocalCurrency(numericGrant, userJurisdiction)}):
+              </div>
+              <div>• {sponsoredMeals} Gourmet Meals Sponsored for Local Seniors</div>
+              <div>• {sponsoredMeals} Hours of P2P Community Care Mobilized</div>
             </div>
 
             <button 
@@ -236,4 +259,21 @@ export default function CorporateCSRPortalPage() {
 
           <a
             href="/corporate"
-            className="flex flex-col items-center justify-center gap-1 py-1 p
+            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-blue-400 font-bold transition-all flex-1"
+          >
+            <Building2 className="w-5 h-5 scale-110 text-blue-400" />
+            <span className="text-[10px] tracking-tight">Corporate</span>
+          </a>
+
+          <a
+            href="/auth"
+            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-slate-400 hover:text-cyan-400 transition-all flex-1"
+          >
+            <LogIn className="w-5 h-5" />
+            <span className="text-[10px] tracking-tight">Account</span>
+          </a>
+        </div>
+      </nav>
+    </div>
+  );
+}
