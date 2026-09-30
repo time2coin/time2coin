@@ -1,8 +1,8 @@
-import CountrySelector from "@/components/CountrySelector";
-import { SUPPORTED_JURISDICTIONS, Jurisdiction } from "@/lib/jurisdictions";
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import CountrySelector from '@/components/CountrySelector';
+import { SUPPORTED_JURISDICTIONS, formatLocalCurrency } from '@/lib/jurisdictions';
 import { 
   Heart, ArrowLeft, LogIn, LogOut, ArrowRight, ShieldCheck, 
   CheckCircle2, Sparkles, DollarSign, Users, Award, MessageSquare, 
@@ -18,20 +18,6 @@ export default function PrivateDonorsPortalPage() {
   const [testimonial, setTestimonial] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [donationSuccess, setDonationSuccess] = useState(false);
-  const [selectedJurisdiction, setSelectedJurisdiction] = useState<Jurisdiction>(SUPPORTED_JURISDICTIONS['MY-MYR']);
-
-  useEffect(() => {
-    const getCookie = (name: string) => {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop()?.split(';').shift();
-      return null;
-    };
-    const savedId = getCookie('time2coin_jurisdiction') || currentUser?.jurisdiction_id || 'MY-MYR';
-    if (SUPPORTED_JURISDICTIONS[savedId]) {
-      setSelectedJurisdiction(SUPPORTED_JURISDICTIONS[savedId]);
-    }
-  }, [currentUser]);
 
   useEffect(() => {
     const saved = localStorage.getItem('time2coin_user');
@@ -81,23 +67,21 @@ export default function PrivateDonorsPortalPage() {
             </a>
           </div>
 
-                    <CountrySelector 
-            userJurisdictionId={currentUser?.jurisdiction_id} 
-            onJurisdictionChange={(j) => setSelectedJurisdiction(SUPPORTED_JURISDICTIONS[j.id] || SUPPORTED_JURISDICTIONS['MY-MYR'])}
-          />
-
-          {currentUser ? (
-            <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-xl shrink-0">
-              <span className="text-[10px] sm:text-xs font-bold text-rose-300 truncate">{currentUser.name}</span>
-              <button onClick={handleLogout} title="Sign Out" className="p-1 text-slate-400 hover:text-rose-400">
-                <LogOut className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          ) : (
-            <a href="/auth" className="px-3 sm:px-4 py-1.5 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 text-white rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center gap-1 shrink-0 shadow-md">
-              <LogIn className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Donor </span>Sign In
-            </a>
-          )}
+          <div className="flex items-center gap-2">
+            <CountrySelector userJurisdictionId={currentUser?.jurisdiction_id} />
+            {currentUser ? (
+              <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-xl shrink-0">
+                <span className="text-[10px] sm:text-xs font-bold text-rose-300 truncate">{currentUser.name}</span>
+                <button onClick={handleLogout} title="Sign Out" className="p-1 text-slate-400 hover:text-rose-400">
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <a href="/auth" className="px-3 sm:px-4 py-1.5 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 text-white rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center gap-1 shrink-0 shadow-md">
+                <LogIn className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Donor </span>Sign In
+              </a>
+            )}
+          </div>
         </div>
       </header>
 
@@ -111,7 +95,7 @@ export default function PrivateDonorsPortalPage() {
             Direct Meal & Care <span className="text-rose-400">Impact Sponsoring</span>
           </h1>
           <p className="text-xs sm:text-base text-slate-300 leading-relaxed max-w-2xl mx-auto">
-            Test drive time2coin with a small donation. Every \$12 sponsors a gourmet surplus meal pass and mobilizes 1 hour of community care with 100% audit transparency.
+            Test drive time2coin with a small donation. Every meal pass sponsors a gourmet surplus meal and mobilizes 1 hour of community care with 100% audit transparency.
           </p>
         </div>
       </section>
@@ -153,7 +137,7 @@ export default function PrivateDonorsPortalPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Or Enter Custom Amount ({selectedJurisdiction.currencySymbol} {selectedJurisdiction.currencyCode})</label>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Or Enter Custom Amount ($ USD)</label>
               <input 
                 type="number" 
                 value={customAmount} 
@@ -164,9 +148,9 @@ export default function PrivateDonorsPortalPage() {
             </div>
 
             <div className="p-4 bg-rose-950/40 border border-rose-800/60 rounded-2xl text-xs text-rose-300 space-y-1">
-              <div className="font-bold text-sm text-white">Your Impact Multiplier ({selectedJurisdiction.currencySymbol}{activeAmount}):</div>
-              <div>• <strong>{Math.floor(activeAmount / selectedJurisdiction.localMealCostFiat)} Gourmet Meals</strong> rescued from restaurant surplus</div>
-              <div>• <strong>{Math.floor(activeAmount / selectedJurisdiction.localMealCostFiat)} Hours</strong> of neighborhood eldercare/tutoring mobilized</div>
+              <div className="font-bold text-sm text-white">Your Impact Multiplier (${activeAmount}):</div>
+              <div>• <strong>{Math.floor(activeAmount / 6)} Gourmet Meals</strong> rescued from restaurant surplus</div>
+              <div>• <strong>{Math.floor(activeAmount / 6)} Hours</strong> of neighborhood eldercare/tutoring mobilized</div>
             </div>
 
             <div className="space-y-3">
@@ -210,7 +194,7 @@ export default function PrivateDonorsPortalPage() {
               type="submit" 
               className="w-full py-3.5 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-lg flex items-center justify-center gap-2"
             >
-              <Heart className="w-4 h-4 fill-white" /> Complete {selectedJurisdiction.currencySymbol}{activeAmount} Micro-Donation
+              <Heart className="w-4 h-4 fill-white" /> Complete ${activeAmount} Micro-Donation
             </button>
           </form>
         </div>
@@ -219,45 +203,25 @@ export default function PrivateDonorsPortalPage() {
       {/* MOBILE BOTTOM NAVIGATION BAR */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur border-t border-slate-800/80 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
         <div className="flex items-stretch justify-around px-2 pt-1.5 pb-2">
-          <a
-            href="/"
-            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-slate-400 hover:text-slate-200 transition-all flex-1"
-          >
+          <a href="/" className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-slate-400 hover:text-slate-200 transition-all flex-1">
             <Clock className="w-5 h-5" />
             <span className="text-[10px] tracking-tight">Home</span>
           </a>
-
-          <a
-            href="/#directory"
-            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-slate-400 hover:text-slate-200 transition-all flex-1"
-          >
+          <a href="/#directory" className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-slate-400 hover:text-slate-200 transition-all flex-1">
             <SlidersHorizontal className="w-5 h-5" />
             <span className="text-[10px] tracking-tight">Directory</span>
           </a>
-
-          <a
-            href="/#directory"
-            className="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition-all flex-1"
-            title="Post Offer"
-          >
+          <a href="/#directory" className="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition-all flex-1" title="Post Offer">
             <div className="w-11 h-11 rounded-full bg-gradient-to-r from-rose-500 to-pink-600 flex items-center justify-center -mt-5 shadow-lg shadow-rose-500/40 ring-4 ring-slate-950">
               <Plus className="w-6 h-6 text-white" />
             </div>
             <span className="text-[10px] font-bold text-slate-400 mt-0.5">Post</span>
           </a>
-
-          <a
-            href="/donors"
-            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-rose-400 font-bold transition-all flex-1"
-          >
+          <a href="/donors" className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-rose-400 font-bold transition-all flex-1">
             <Heart className="w-5 h-5 scale-110 text-rose-400" />
             <span className="text-[10px] tracking-tight">Donors</span>
           </a>
-
-          <a
-            href="/auth"
-            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-slate-400 hover:text-cyan-400 transition-all flex-1"
-          >
+          <a href="/auth" className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-slate-400 hover:text-cyan-400 transition-all flex-1">
             <LogIn className="w-5 h-5" />
             <span className="text-[10px] tracking-tight">Account</span>
           </a>
