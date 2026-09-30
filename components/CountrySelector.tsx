@@ -16,7 +16,7 @@ export const JURISDICTIONS: JurisdictionOption[] = [
   {
     id: 'MY-MYR',
     countryCode: 'MY',
-    countryName: 'Malaysia (Default Launch Region)',
+    countryName: 'Malaysia',
     currencyCode: 'MYR',
     currencySymbol: 'RM',
     flagEmoji: '🇲🇾',
@@ -107,15 +107,12 @@ export default function CountrySelector({
   onJurisdictionChange, 
   className = '' 
 }: CountrySelectorProps) {
-  // Always default to Malaysia (JURISDICTIONS[0])
-  const [selected, setSelected] = useState<JurisdictionOption>(
-    JURISDICTIONS.find((j) => j.id === userJurisdictionId) || JURISDICTIONS[0]
-  );
+  const [selected, setSelected] = useState<JurisdictionOption>(JURISDICTIONS[0]);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // If user explicit jurisdiction passed from logged-in profile, prioritize it
+    // 1. Priority: User prop if logged in
     if (userJurisdictionId) {
       const match = JURISDICTIONS.find((j) => j.id === userJurisdictionId);
       if (match) {
@@ -124,7 +121,7 @@ export default function CountrySelector({
       }
     }
 
-    // Otherwise read saved jurisdiction from cookies/localStorage
+    // 2. Read saved jurisdiction from cookie
     const getCookie = (name: string) => {
       const value = `; ${document.cookie}`;
       const parts = value.split(`; ${name}=`);
@@ -136,9 +133,6 @@ export default function CountrySelector({
     if (savedId) {
       const match = JURISDICTIONS.find((j) => j.id === savedId);
       if (match) setSelected(match);
-    } else {
-      // Default fallback is Malaysia (MY-MYR)
-      setSelected(JURISDICTIONS[0]);
     }
   }, [userJurisdictionId]);
 
@@ -156,6 +150,7 @@ export default function CountrySelector({
     setSelected(option);
     setIsOpen(false);
 
+    // Save selection to cookie (1 year expiration)
     document.cookie = `time2coin_jurisdiction=${option.id}; path=/; max-age=31536000; SameSite=Lax`;
 
     if (onJurisdictionChange) {
@@ -167,17 +162,20 @@ export default function CountrySelector({
 
   return (
     <div className={`relative inline-block text-left ${className}`} ref={dropdownRef}>
+      {/* Shortened ultra-compact trigger for mobile to protect header space */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-1.5 bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-700/80 rounded-xl text-xs font-semibold transition shadow-sm hover:border-cyan-500/50"
-        title="Switch Country / Jurisdiction Currency"
+        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-700/80 rounded-xl text-xs font-semibold transition shadow-sm hover:border-cyan-500/50"
+        title="Switch Region / Currency"
       >
-        <span className="text-base leading-none">{selected.flagEmoji}</span>
-        <span className="font-bold text-slate-100">{selected.currencySymbol}</span>
-        <span className="text-[10px] text-slate-400 uppercase font-mono">({selected.currencyCode})</span>
+        <span className="text-sm sm:text-base leading-none">{selected.flagEmoji}</span>
+        <span className="font-bold text-slate-100 text-xs">{selected.currencySymbol}</span>
+        <span className="text-[10px] text-slate-400 uppercase font-mono hidden sm:inline">
+          ({selected.currencyCode})
+        </span>
         <svg
-          className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -187,10 +185,14 @@ export default function CountrySelector({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl z-50 overflow-hidden divide-y divide-slate-800">
+        <div className="absolute right-0 mt-2 w-56 sm:w-64 bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl z-50 overflow-hidden divide-y divide-slate-800">
           <div className="p-2.5 bg-slate-950/50">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-cyan-400">Select Region / Currency</p>
-            <p className="text-[11px] text-slate-400 mt-0.5">Time Equity is universal (1h = 1h). Fiat is localized.</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-cyan-400">
+              Select Region / Currency
+            </p>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              1h = 1h Universal Time Equity. Fiat is localized.
+            </p>
           </div>
 
           <div className="max-h-64 overflow-y-auto p-1.5 space-y-0.5 custom-scrollbar">
@@ -200,29 +202,31 @@ export default function CountrySelector({
                 <button
                   key={j.id}
                   onClick={() => handleSelect(j)}
-                  className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center justify-between transition ${
+                  className={`w-full text-left px-2.5 sm:px-3 py-2 rounded-xl text-xs flex items-center justify-between transition ${
                     isSelected
                       ? 'bg-cyan-950/60 text-cyan-200 border border-cyan-800/50 font-bold'
                       : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-lg leading-none">{j.flagEmoji}</span>
-                    <div>
-                      <div className="font-semibold leading-tight">{j.countryName}</div>
-                      <div className="text-[10px] text-slate-400">
-                        Meal Pass Baseline: <span className="text-emerald-400 font-mono">{j.currencySymbol} {j.mealCostFiat.toLocaleString()}</span>
+                  <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+                    <span className="text-base sm:text-lg leading-none shrink-0">{j.flagEmoji}</span>
+                    <div className="min-w-0">
+                      <div className="font-semibold leading-tight truncate">{j.countryName}</div>
+                      <div className="text-[10px] text-slate-400 truncate">
+                        Meal Pass: <span className="text-emerald-400 font-mono">{j.currencySymbol} {j.mealCostFiat.toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
-                  <span className="font-mono text-[11px] text-slate-400 font-bold">{j.currencyCode}</span>
+                  <span className="font-mono text-[10px] sm:text-[11px] text-slate-400 font-bold shrink-0 ml-1">
+                    {j.currencyCode}
+                  </span>
                 </button>
               );
             })}
           </div>
 
           <div className="p-2 bg-slate-950/70 text-center">
-            <span className="text-[10px] text-slate-400">🌐 Digital services visible across all regions</span>
+            <span className="text-[10px] text-slate-400">🌐 Digital services visible globally</span>
           </div>
         </div>
       )}
