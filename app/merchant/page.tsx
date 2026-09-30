@@ -1,5 +1,4 @@
 'use client';
-
 import CountrySelector from '@/components/CountrySelector';
 import { SUPPORTED_JURISDICTIONS, formatLocalCurrency } from '@/lib/jurisdictions';
 import React, { useState, useEffect } from 'react';
@@ -165,11 +164,10 @@ export default function MerchantPortalPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-24 lg:pb-16 overflow-x-hidden w-full">
-      {/* HEADER WITH SLEEK RESPONSIVE BACK BUTTON */}
+            {/* HEADER WITH SLEEK RESPONSIVE BACK BUTTON */}
       <header className="border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-40 px-3 sm:px-4 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          <CountrySelector userJurisdictionId={currentUser?.jurisdiction_id} />
             <a 
               href="/" 
               className="p-2 sm:px-3 sm:py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-sm"
@@ -187,18 +185,22 @@ export default function MerchantPortalPage() {
             </a>
           </div>
           
-          {currentUser ? (
-            <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-xl shrink-0">
-              <span className="text-[10px] sm:text-xs font-bold text-amber-300 truncate max-w-[100px] sm:max-w-none">{currentUser.name}</span>
-              <button onClick={handleLogout} title="Sign Out" className="p-1 text-slate-400 hover:text-rose-400">
-                <LogOut className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          ) : (
-            <a href="/auth" className="px-3 sm:px-4 py-1.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 text-white rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center gap-1 shrink-0 shadow-md">
-              <LogIn className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Register / </span>Sign In
-            </a>
-          )}
+          <div className="flex items-center gap-2">
+            <CountrySelector userJurisdictionId={currentUser?.jurisdiction_id} />
+
+            {currentUser ? (
+              <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-xl shrink-0">
+                <span className="text-[10px] sm:text-xs font-bold text-amber-300 truncate max-w-[100px] sm:max-w-none">{currentUser.name}</span>
+                <button onClick={handleLogout} title="Sign Out" className="p-1 text-slate-400 hover:text-rose-400">
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <a href="/auth" className="px-3 sm:px-4 py-1.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 text-white rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center gap-1 shrink-0 shadow-md">
+                <LogIn className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Register / </span>Sign In
+              </a>
+            )}
+          </div>
         </div>
       </header>
 
@@ -442,4 +444,190 @@ export default function MerchantPortalPage() {
           ) : (
             /* LOGGED-OUT PROMPT FOR REGISTRATION */
             <div className="text-center space-y-4 py-4">
-              <Store classNa
+              <Store className="w-12 h-12 text-amber-400 mx-auto" />
+              <div className="space-y-1">
+                <h2 className="text-xl font-bold text-white">Merchant Registration Required</h2>
+                <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                  To ensure food quality, safety, and inventory transparency, food listings can only be created by registered merchant accounts.
+                </p>
+              </div>
+
+              <a 
+                href="/auth" 
+                className="inline-flex items-center justify-center gap-2 w-full py-3.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-xl"
+              >
+                Register / Sign In as Merchant Partner <ArrowRight className="w-4 h-4" />
+              </a>
+            </div>
+          )}
+        </div>
+
+        {/* LIVE PUBLISHED MERCHANT OFFERS SHOWCASE WITH LIGHTBOX */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div>
+              <h2 className="text-xl font-bold text-white">Live Merchant Food Offers</h2>
+              <p className="text-xs text-slate-400">Tap on any small photo to enlarge for a focused view.</p>
+            </div>
+            <span className="text-xs font-bold text-amber-400 bg-amber-950 border border-amber-800 px-3 py-1 rounded-full">
+              {publishedOffers.length} Active Offers
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {publishedOffers.map((item) => (
+              <div key={item.id} className="bg-slate-900 border border-amber-800/40 hover:border-amber-500/60 rounded-2xl p-5 space-y-4 transition shadow-lg flex flex-col justify-between">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-start">
+                    <span className="text-xs font-bold text-amber-300 bg-amber-950 border border-amber-800 px-2.5 py-0.5 rounded-full">
+                      {item.merchantName}
+                    </span>
+
+                    {item.isFree ? (
+                      <span className="text-xs font-black text-emerald-300 bg-emerald-950 border border-emerald-800 px-3 py-1 rounded-full flex items-center gap-1">
+                        <HeartHandshake className="w-3.5 h-3.5 text-emerald-400" /> FREE GIVE
+                      </span>
+                    ) : (
+                      <span className="text-sm font-black text-amber-300">
+                        {item.timeValue} <span className="text-xs text-slate-400 font-normal">Mins</span>
+                      </span>
+                    )}
+                  </div>
+
+                  <h3 className="font-bold text-white text-base">{item.title}</h3>
+                  <p className="text-xs text-slate-300 leading-relaxed">{item.description}</p>
+
+                  <div className="text-xs text-slate-400 flex items-center justify-between pt-1">
+                    <span>Quantity: <strong className="text-slate-200">{item.quantity}</strong></span>
+                    <span>Pickup: <strong className="text-amber-300">{item.pickupWindow}</strong></span>
+                  </div>
+
+                  {/* PHOTO THUMBNAILS GRID (MAX 3) WITH ENLARGE CLICK */}
+                  {item.photos && item.photos.length > 0 && (
+                    <div className="pt-2">
+                      <span className="text-[10px] text-slate-400 block mb-1 font-semibold flex items-center gap-1">
+                        <Eye className="w-3 h-3 text-amber-400" /> Food Photos ({item.photos.length}) — Click to enlarge:
+                      </span>
+                      <div className="flex gap-2">
+                        {item.photos.map((imgUrl, idx) => (
+                          <div 
+                            key={idx} 
+                            onClick={() => setSelectedImage(imgUrl)}
+                            className="w-20 h-20 rounded-xl overflow-hidden border border-slate-700 bg-slate-950 cursor-pointer relative group shrink-0"
+                          >
+                            <img src={imgUrl} alt={`${item.title} ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition" />
+                            <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                              <ZoomIn className="w-5 h-5 text-white" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                  <span className="text-[10px] text-slate-500">{item.createdAt}</span>
+                  <a href="/#directory" className="px-4 py-1.5 bg-gradient-to-r from-amber-600 to-amber-500 text-white font-bold text-xs rounded-xl transition flex items-center gap-1 shadow-md">
+                    Redeem Meal <ArrowRight className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* LIGHTBOX MODAL FOR ENLARGED PHOTO VIEW */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div 
+            className="relative max-w-3xl max-h-[90vh] bg-slate-900 border border-slate-800 rounded-3xl p-2 shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setSelectedImage(null)}
+              className="absolute top-4 right-4 bg-slate-950/80 hover:bg-rose-600 text-white rounded-full p-2 transition z-10"
+              title="Close Image"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <img 
+              src={selectedImage} 
+              alt="Enlarged focus view" 
+              className="w-full h-auto max-h-[80vh] object-contain rounded-2xl"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* PERSISTENT MOBILE BOTTOM NAVIGATION BAR FOR PARTNER PAGES */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur border-t border-slate-800/80 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+        <div className="flex items-stretch justify-around px-2 pt-1.5 pb-2">
+          {/* HOME */}
+          <a
+            href="/"
+            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-slate-400 hover:text-slate-200 transition-all flex-1"
+          >
+            <Clock className="w-5 h-5" />
+            <span className="text-[10px] tracking-tight">Home</span>
+          </a>
+
+          {/* BROWSE DIRECTORY */}
+          <a
+            href="/#directory"
+            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-slate-400 hover:text-slate-200 transition-all flex-1"
+          >
+            <SlidersHorizontal className="w-5 h-5" />
+            <span className="text-[10px] tracking-tight">Directory</span>
+          </a>
+
+          {/* RAISED CENTER + POST BUTTON */}
+          <a
+            href={currentUser ? "/#post" : "/auth"}
+            className="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition-all flex-1"
+            title="Post Food / Skill Offer"
+          >
+            <div className="w-11 h-11 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 flex items-center justify-center -mt-5 shadow-lg shadow-amber-500/40 ring-4 ring-slate-950">
+              <Plus className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-[10px] font-bold mt-0.5 text-amber-400">
+              Post
+            </span>
+          </a>
+
+          {/* ACTIVE PARTNER PORTAL TAB */}
+          <a
+            href="/merchant"
+            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-amber-400 font-bold transition-all flex-1"
+          >
+            <Utensils className="w-5 h-5 scale-110" />
+            <span className="text-[10px] tracking-tight">Merchant</span>
+          </a>
+
+          {/* ACCOUNT / SIGN IN */}
+          {currentUser ? (
+            <button
+              onClick={handleLogout}
+              className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-slate-400 hover:text-rose-400 transition-all flex-1"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="text-[10px] tracking-tight">Sign Out</span>
+            </button>
+          ) : (
+            <a
+              href="/auth"
+              className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-slate-400 hover:text-cyan-400 transition-all flex-1"
+            >
+              <LogIn className="w-5 h-5" />
+              <span className="text-[10px] tracking-tight">Sign In</span>
+            </a>
+          )}
+        </div>
+      </nav>
+    </div>
+  );
+}
