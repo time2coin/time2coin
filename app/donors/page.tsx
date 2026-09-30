@@ -1,3 +1,5 @@
+import CountrySelector from "@/components/CountrySelector";
+import { SUPPORTED_JURISDICTIONS, Jurisdiction } from "@/lib/jurisdictions";
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -16,6 +18,20 @@ export default function PrivateDonorsPortalPage() {
   const [testimonial, setTestimonial] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [donationSuccess, setDonationSuccess] = useState(false);
+  const [selectedJurisdiction, setSelectedJurisdiction] = useState<Jurisdiction>(SUPPORTED_JURISDICTIONS['MY-MYR']);
+
+  useEffect(() => {
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+      return null;
+    };
+    const savedId = getCookie('time2coin_jurisdiction') || currentUser?.jurisdiction_id || 'MY-MYR';
+    if (SUPPORTED_JURISDICTIONS[savedId]) {
+      setSelectedJurisdiction(SUPPORTED_JURISDICTIONS[savedId]);
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     const saved = localStorage.getItem('time2coin_user');
@@ -64,6 +80,11 @@ export default function PrivateDonorsPortalPage() {
               <span className="font-bold text-sm sm:text-lg text-white truncate">time2coin <span className="text-rose-400 text-xs font-normal hidden md:inline">| Private Donors Portal</span></span>
             </a>
           </div>
+
+                    <CountrySelector 
+            userJurisdictionId={currentUser?.jurisdiction_id} 
+            onJurisdictionChange={(j) => setSelectedJurisdiction(SUPPORTED_JURISDICTIONS[j.id] || SUPPORTED_JURISDICTIONS['MY-MYR'])}
+          />
 
           {currentUser ? (
             <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-xl shrink-0">
@@ -132,7 +153,7 @@ export default function PrivateDonorsPortalPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Or Enter Custom Amount ($ USD)</label>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Or Enter Custom Amount ({selectedJurisdiction.currencySymbol} {selectedJurisdiction.currencyCode})</label>
               <input 
                 type="number" 
                 value={customAmount} 
@@ -143,9 +164,9 @@ export default function PrivateDonorsPortalPage() {
             </div>
 
             <div className="p-4 bg-rose-950/40 border border-rose-800/60 rounded-2xl text-xs text-rose-300 space-y-1">
-              <div className="font-bold text-sm text-white">Your Impact Multiplier (${activeAmount}):</div>
-              <div>• <strong>{Math.floor(activeAmount / 12)} Gourmet Meals</strong> rescued from restaurant surplus</div>
-              <div>• <strong>{Math.floor(activeAmount / 12)} Hours</strong> of neighborhood eldercare/tutoring mobilized</div>
+              <div className="font-bold text-sm text-white">Your Impact Multiplier ({selectedJurisdiction.currencySymbol}{activeAmount}):</div>
+              <div>• <strong>{Math.floor(activeAmount / selectedJurisdiction.localMealCostFiat)} Gourmet Meals</strong> rescued from restaurant surplus</div>
+              <div>• <strong>{Math.floor(activeAmount / selectedJurisdiction.localMealCostFiat)} Hours</strong> of neighborhood eldercare/tutoring mobilized</div>
             </div>
 
             <div className="space-y-3">
@@ -189,7 +210,7 @@ export default function PrivateDonorsPortalPage() {
               type="submit" 
               className="w-full py-3.5 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-lg flex items-center justify-center gap-2"
             >
-              <Heart className="w-4 h-4 fill-white" /> Complete ${activeAmount} Micro-Donation
+              <Heart className="w-4 h-4 fill-white" /> Complete {selectedJurisdiction.currencySymbol}{activeAmount} Micro-Donation
             </button>
           </form>
         </div>
