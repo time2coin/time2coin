@@ -1,3 +1,5 @@
+import CountrySelector from "@/components/CountrySelector";
+import { SUPPORTED_JURISDICTIONS, Jurisdiction } from "@/lib/jurisdictions";
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -37,6 +39,20 @@ export default function MerchantPortalPage() {
 
   // Lightbox Modal State for Enlarged Image Focus
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedJurisdiction, setSelectedJurisdiction] = useState<Jurisdiction>(SUPPORTED_JURISDICTIONS['MY-MYR']);
+
+  useEffect(() => {
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+      return null;
+    };
+    const savedId = getCookie('time2coin_jurisdiction') || currentUser?.jurisdiction_id || 'MY-MYR';
+    if (SUPPORTED_JURISDICTIONS[savedId]) {
+      setSelectedJurisdiction(SUPPORTED_JURISDICTIONS[savedId]);
+    }
+  }, [currentUser]);
 
   // Pre-populated sample photos for easy demonstration
   const sampleFoodPhotos = [
@@ -184,6 +200,11 @@ export default function MerchantPortalPage() {
             </a>
           </div>
           
+                    <CountrySelector 
+            userJurisdictionId={currentUser?.jurisdiction_id} 
+            onJurisdictionChange={(j) => setSelectedJurisdiction(SUPPORTED_JURISDICTIONS[j.id] || SUPPORTED_JURISDICTIONS['MY-MYR'])}
+          />
+
           {currentUser ? (
             <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-xl shrink-0">
               <span className="text-[10px] sm:text-xs font-bold text-amber-300 truncate max-w-[100px] sm:max-w-none">{currentUser.name}</span>
@@ -251,6 +272,11 @@ export default function MerchantPortalPage() {
 
         {/* CONDITIONALLY RENDERED POSTING FORM VS REGISTRATION GATE */}
         <div className="bg-slate-900 border border-amber-800/40 rounded-3xl p-6 sm:p-8 max-w-2xl mx-auto shadow-2xl space-y-6">
+                    <CountrySelector 
+            userJurisdictionId={currentUser?.jurisdiction_id} 
+            onJurisdictionChange={(j) => setSelectedJurisdiction(SUPPORTED_JURISDICTIONS[j.id] || SUPPORTED_JURISDICTIONS['MY-MYR'])}
+          />
+
           {currentUser ? (
             /* LOGGED-IN VERIFIED MERCHANT DASHBOARD */
             <div className="space-y-5">
@@ -604,6 +630,11 @@ export default function MerchantPortalPage() {
           </a>
 
           {/* ACCOUNT / SIGN IN */}
+                    <CountrySelector 
+            userJurisdictionId={currentUser?.jurisdiction_id} 
+            onJurisdictionChange={(j) => setSelectedJurisdiction(SUPPORTED_JURISDICTIONS[j.id] || SUPPORTED_JURISDICTIONS['MY-MYR'])}
+          />
+
           {currentUser ? (
             <button
               onClick={handleLogout}
