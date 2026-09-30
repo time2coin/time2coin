@@ -1,5 +1,7 @@
 'use client';
 
+import CountrySelector from '@/components/CountrySelector';
+import { SUPPORTED_JURISDICTIONS, formatLocalCurrency } from '@/lib/jurisdictions';
 import React, { useState, useEffect } from 'react';
 import { 
   Utensils, Store, ArrowRight, ShieldCheck, CheckCircle2, 
@@ -7,7 +9,6 @@ import {
   Image as ImageIcon, X, ZoomIn, HeartHandshake, Eye, Clock,
   SlidersHorizontal, Building2, Heart, Shield, Menu
 } from 'lucide-react';
-import CountrySelector from '@/components/CountrySelector';
 
 interface FoodItem {
   id: string;
@@ -24,8 +25,9 @@ interface FoodItem {
 
 export default function MerchantPortalPage() {
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
-  // Post Surplus Food Form State
+  // Post Surplus Food Form State (Logged-In Merchants)
   const [foodTitle, setFoodTitle] = useState('');
   const [foodQuantity, setFoodQuantity] = useState('5');
   const [timeValue, setTimeValue] = useState('45');
@@ -35,15 +37,17 @@ export default function MerchantPortalPage() {
   const [photos, setPhotos] = useState<string[]>([]);
   const [postSuccess, setPostSuccess] = useState(false);
 
-  // Lightbox Modal State
+  // Lightbox Modal State for Enlarged Image Focus
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
+  // Pre-populated sample photos for easy demonstration
   const sampleFoodPhotos = [
     'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80',
     'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop&q=80',
     'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&auto=format&fit=crop&q=80'
   ];
 
+  // Sample Published Merchant Items
   const [publishedOffers, setPublishedOffers] = useState<FoodItem[]>([
     {
       id: 'm-1',
@@ -106,6 +110,26 @@ export default function MerchantPortalPage() {
     setPhotos(photos.filter((_, i) => i !== index));
   };
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    
+    if (photos.length + files.length > 3) {
+      alert('You can upload a maximum of 3 photos.');
+      return;
+    }
+
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (reader.result) {
+          setPhotos(prev => [...prev, reader.result as string].slice(0, 3));
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handlePostFood = (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) {
@@ -145,6 +169,7 @@ export default function MerchantPortalPage() {
       <header className="border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-40 px-3 sm:px-4 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <CountrySelector userJurisdictionId={currentUser?.jurisdiction_id} />
             <a 
               href="/" 
               className="p-2 sm:px-3 sm:py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-sm"
@@ -162,22 +187,18 @@ export default function MerchantPortalPage() {
             </a>
           </div>
           
-          <div className="flex items-center gap-2 shrink-0">
-            <CountrySelector userJurisdictionId={currentUser?.jurisdiction_id} />
-
-            {currentUser ? (
-              <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-xl shrink-0">
-                <span className="text-[10px] sm:text-xs font-bold text-amber-300 truncate max-w-[100px] sm:max-w-none">{currentUser.name}</span>
-                <button onClick={handleLogout} title="Sign Out" className="p-1 text-slate-400 hover:text-rose-400">
-                  <LogOut className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ) : (
-              <a href="/auth" className="px-3 sm:px-4 py-1.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 text-white rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center gap-1 shrink-0 shadow-md">
-                <LogIn className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Register / </span>Sign In
-              </a>
-            )}
-          </div>
+          {currentUser ? (
+            <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-xl shrink-0">
+              <span className="text-[10px] sm:text-xs font-bold text-amber-300 truncate max-w-[100px] sm:max-w-none">{currentUser.name}</span>
+              <button onClick={handleLogout} title="Sign Out" className="p-1 text-slate-400 hover:text-rose-400">
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <a href="/auth" className="px-3 sm:px-4 py-1.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 text-white rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center gap-1 shrink-0 shadow-md">
+              <LogIn className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Register / </span>Sign In
+            </a>
+          )}
         </div>
       </header>
 
@@ -198,6 +219,7 @@ export default function MerchantPortalPage() {
 
       {/* MAIN CONTAINER */}
       <div className="max-w-6xl mx-auto px-4 py-10 space-y-12">
+        {/* VALUE PROPOSITIONS */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-3">
             <div className="w-10 h-10 rounded-xl bg-amber-950 border border-amber-800 flex items-center justify-center text-amber-400 font-bold">
@@ -230,9 +252,10 @@ export default function MerchantPortalPage() {
           </div>
         </div>
 
-        {/* POSTING FORM */}
+        {/* CONDITIONALLY RENDERED POSTING FORM VS REGISTRATION GATE */}
         <div className="bg-slate-900 border border-amber-800/40 rounded-3xl p-6 sm:p-8 max-w-2xl mx-auto shadow-2xl space-y-6">
           {currentUser ? (
+            /* LOGGED-IN VERIFIED MERCHANT DASHBOARD */
             <div className="space-y-5">
               <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
@@ -283,91 +306,126 @@ export default function MerchantPortalPage() {
                       required 
                       value={pickupWindow} 
                       onChange={(e) => setPickupWindow(e.target.value)} 
-                      placeholder="e.g. 5:00 PM - 7:00 PM"
+                      placeholder="e.g. 5:00 PM - 7:00 PM" 
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500" 
                     />
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Description & Dietary Notes</label>
-                  <textarea 
-                    rows={3} 
-                    required 
-                    value={description} 
-                    onChange={(e) => setDescription(e.target.value)} 
-                    placeholder="Describe fresh ingredients, dietary tags (Halal, Vegan, Organic), or pickup instructions..." 
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 resize-none" 
-                  />
-                </div>
-
-                {/* PRICE OR 100% FREE TOGGLE */}
-                <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-3">
+                {/* PRICING & FREE OPTION TOGGLE */}
+                <div className="bg-slate-950 border border-slate-800/80 rounded-2xl p-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-xs font-bold text-white block">Offer 100% FREE to Community</span>
-                      <span className="text-[10px] text-slate-400 block">Give food away at zero cost to vulnerable local families</span>
-                    </div>
-                    <button 
-                      type="button" 
-                      onClick={() => setIsFree(!isFree)}
-                      className={`w-12 h-6 flex items-center rounded-full p-1 transition ${isFree ? 'bg-emerald-600 justify-end' : 'bg-slate-800 justify-start'}`}
-                    >
-                      <div className="w-4 h-4 rounded-full bg-white shadow-md"></div>
-                    </button>
+                    <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                      <HeartHandshake className="w-4 h-4 text-emerald-400" /> Pricing Option
+                    </label>
+
+                    <label className="inline-flex items-center cursor-pointer gap-2">
+                      <input 
+                        type="checkbox" 
+                        checked={isFree} 
+                        onChange={(e) => {
+                          setIsFree(e.target.checked);
+                          if (e.target.checked) setTimeValue('0');
+                        }}
+                        className="sr-only peer" 
+                      />
+                      <div className="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600 relative"></div>
+                      <span className="text-xs font-bold text-emerald-400">Offer 100% FREE (0 Mins)</span>
+                    </label>
                   </div>
 
-                  {!isFree && (
-                    <div className="pt-2 border-t border-slate-800">
-                      <label className="block text-xs font-semibold text-amber-300 mb-1">Time Equity Price (Minutes)</label>
+                  {!isFree ? (
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-400 mb-1">Time Minutes Value (Price)</label>
                       <input 
                         type="number" 
+                        required={!isFree}
                         value={timeValue} 
                         onChange={(e) => setTimeValue(e.target.value)} 
-                        className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-amber-500 font-bold" 
+                        placeholder="45"
+                        className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-amber-500" 
                       />
+                    </div>
+                  ) : (
+                    <div className="p-2.5 bg-emerald-950/60 border border-emerald-800/80 rounded-xl text-[11px] text-emerald-300 flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <span>This item will be listed as <strong>FREE Community Food (0 Time Minutes)</strong> for instant neighbor pickup.</span>
                     </div>
                   )}
                 </div>
 
-                {/* SHOWCASE PHOTOS */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Attach Food Photos (Max 3)</label>
-                  <div className="grid grid-cols-3 gap-2 mb-2">
-                    {photos.map((url, idx) => (
-                      <div key={idx} className="relative group rounded-xl overflow-hidden border border-slate-800 h-20 bg-slate-950">
-                        <img src={url} alt="Food preview" className="w-full h-full object-cover" />
-                        <button 
-                          type="button" 
-                          onClick={() => handleRemovePhoto(idx)} 
-                          className="absolute top-1 right-1 bg-slate-950/80 text-rose-400 p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ))}
-                    {photos.length < 3 && (
-                      <div className="border-2 border-dashed border-slate-800 rounded-xl h-20 flex flex-col items-center justify-center p-2 text-slate-500">
-                        <ImageIcon className="w-5 h-5 mb-1" />
-                        <span className="text-[9px]">Select Sample Below</span>
-                      </div>
-                    )}
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Item Description</label>
+                  <textarea 
+                    required 
+                    rows={3} 
+                    value={description} 
+                    onChange={(e) => setDescription(e.target.value)} 
+                    placeholder="Describe ingredients, dietary details (e.g. Vegan/Halal), packaging, and pickup instructions..." 
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 resize-none" 
+                  />
+                </div>
+
+                {/* PHOTO UPLOAD SECTION (MAX 3 SMALL PHOTOS) */}
+                <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                      <ImageIcon className="w-4 h-4 text-amber-400" /> Food Photos (Max 3 Small Photos)
+                    </label>
+                    <span className="text-[10px] text-slate-400">{photos.length}/3 attached</span>
                   </div>
 
-                  {photos.length < 3 && (
-                    <div className="p-2.5 bg-slate-950 border border-slate-800/80 rounded-xl space-y-1">
-                      <span className="text-[10px] text-slate-400 font-medium block">Quick Add Sample Food Photos:</span>
-                      <div className="flex gap-2">
-                        {sampleFoodPhotos.map((url, i) => (
+                  {/* THUMBNAIL PREVIEW GRID */}
+                  {photos.length > 0 && (
+                    <div className="grid grid-cols-3 gap-2 pt-1">
+                      {photos.map((photo, idx) => (
+                        <div key={idx} className="relative group rounded-xl overflow-hidden border border-slate-700 bg-slate-900 aspect-square">
+                          <img src={photo} alt={`Food preview ${idx + 1}`} className="w-full h-full object-cover" />
                           <button 
-                            key={i} 
                             type="button" 
-                            onClick={() => handleAddSamplePhoto(url)} 
-                            className="text-[10px] text-amber-400 hover:underline font-mono bg-amber-950/40 border border-amber-900/60 px-2 py-0.5 rounded"
+                            onClick={() => handleRemovePhoto(idx)}
+                            className="absolute top-1 right-1 bg-slate-950/80 hover:bg-rose-600 text-white rounded-full p-1 transition"
+                            title="Remove Photo"
                           >
-                            + Photo {i + 1}
+                            <X className="w-3 h-3" />
                           </button>
-                        ))}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {photos.length < 3 && (
+                    <div className="space-y-2">
+                      <label className="block border-2 border-dashed border-slate-800 hover:border-amber-500/60 rounded-xl p-3 text-center cursor-pointer transition bg-slate-900/50">
+                        <ImageIcon className="w-5 h-5 text-amber-400 mx-auto mb-1" />
+                        <span className="text-xs font-semibold text-slate-300 block">Click to upload food photos</span>
+                        <span className="text-[10px] text-slate-500 block">PNG, JPG, or WEBP up to 5MB</span>
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          multiple 
+                          onChange={handleFileUpload} 
+                          className="hidden" 
+                        />
+                      </label>
+
+                      {/* QUICK SAMPLE PHOTO PICKER FOR DEMONSTRATION */}
+                      <div className="pt-1">
+                        <span className="text-[10px] text-slate-400 block mb-1">Or click sample food photos to test:</span>
+                        <div className="flex gap-2">
+                          {sampleFoodPhotos.map((url, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => handleAddSamplePhoto(url)}
+                              className="w-12 h-12 rounded-lg overflow-hidden border border-slate-800 hover:border-amber-400 transition shrink-0 relative"
+                              title="Add Sample Photo"
+                            >
+                              <img src={url} alt="Sample food" className="w-full h-full object-cover" />
+                              <Plus className="w-3.5 h-3.5 text-white bg-slate-950/70 rounded-full absolute bottom-0.5 right-0.5" />
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -375,79 +433,13 @@ export default function MerchantPortalPage() {
 
                 <button 
                   type="submit" 
-                  className="w-full py-3.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 text-white font-extrabold text-xs sm:text-sm rounded-xl transition shadow-lg flex items-center justify-center gap-2"
+                  className="w-full py-3 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-lg flex items-center justify-center gap-2"
                 >
-                  <Send className="w-4 h-4" /> Publish Surplus Food Offer
+                  <Send className="w-4 h-4" /> Publish Food Offer
                 </button>
               </form>
             </div>
           ) : (
-            <div className="text-center py-6 space-y-4">
-              <div className="w-12 h-12 rounded-full bg-amber-950 border border-amber-800 flex items-center justify-center mx-auto text-amber-400">
-                <Store className="w-6 h-6" />
-              </div>
-              <h2 className="text-xl font-extrabold text-white">Merchant Partner Sign In Required</h2>
-              <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
-                Sign in or register your food business to start posting surplus meals, tracking food waste reduction, and redeeming Time Minutes for operational labor.
-              </p>
-              <a 
-                href="/auth" 
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-lg"
-              >
-                <LogIn className="w-4 h-4" /> Sign In / Register Merchant Account
-              </a>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* MOBILE BOTTOM NAV */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur border-t border-slate-800/80 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
-        <div className="flex items-stretch justify-around px-2 pt-1.5 pb-2">
-          <a
-            href="/"
-            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-slate-400 hover:text-slate-200 transition-all flex-1"
-          >
-            <Clock className="w-5 h-5" />
-            <span className="text-[10px] tracking-tight">Home</span>
-          </a>
-
-          <a
-            href="/#directory"
-            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-slate-400 hover:text-slate-200 transition-all flex-1"
-          >
-            <SlidersHorizontal className="w-5 h-5" />
-            <span className="text-[10px] tracking-tight">Directory</span>
-          </a>
-
-          <a
-            href="/merchant"
-            className="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition-all flex-1"
-            title="Post Offer"
-          >
-            <div className="w-11 h-11 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 flex items-center justify-center -mt-5 shadow-lg shadow-amber-500/40 ring-4 ring-slate-950">
-              <Plus className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-[10px] font-bold text-slate-400 mt-0.5">Post</span>
-          </a>
-
-          <a
-            href="/merchant"
-            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-amber-400 font-bold transition-all flex-1"
-          >
-            <Utensils className="w-5 h-5 scale-110 text-amber-400" />
-            <span className="text-[10px] tracking-tight">Merchant</span>
-          </a>
-
-          <a
-            href="/auth"
-            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-slate-400 hover:text-cyan-400 transition-all flex-1"
-          >
-            <LogIn className="w-5 h-5" />
-            <span className="text-[10px] tracking-tight">Account</span>
-          </a>
-        </div>
-      </nav>
-    </div>
-  );
-}
+            /* LOGGED-OUT PROMPT FOR REGISTRATION */
+            <div className="text-center space-y-4 py-4">
+              <Store classNa
