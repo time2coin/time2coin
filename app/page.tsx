@@ -1,8 +1,8 @@
 'use client';
-import CountrySelector from '@/components/CountrySelector';
 
 import React, { useState, useEffect } from 'react';
 import { 
+  MapPin, 
   Clock, ShieldCheck, HeartHandshake, Award, QrCode, Star, Lock, 
   CheckCircle2, AlertCircle, Sparkles, ArrowRight, User, Check, 
   RefreshCw, Sliders, ChevronRight, Utensils, Wifi, Building2, 
@@ -56,6 +56,106 @@ interface ActiveTransaction {
   status: TransactionStatus;
   verificationPin: string;
   createdAt: string;
+}
+
+
+interface LocationOption {
+  id: string;
+  shortCode: string;
+  name: string;
+  flag: string;
+}
+
+const LOCATIONS: LocationOption[] = [
+  { id: 'MY-KL', shortCode: 'KL', name: 'Kuala Lumpur, MY', flag: '🇲🇾' },
+  { id: 'MY-SJ', shortCode: 'Subang', name: 'Subang Jaya, MY', flag: '🇲🇾' },
+  { id: 'SG-ALL', shortCode: 'SG', name: 'Singapore', flag: '🇸🇬' },
+  { id: 'UK-LON', shortCode: 'UK', name: 'London, UK', flag: '🇬🇧' },
+  { id: 'GLOBAL', shortCode: 'Global', name: 'Global (Remote Skills)', flag: '🌐' },
+];
+
+function LocationSelector({ className = '' }: { className?: string }) {
+  const [selected, setSelected] = useState<LocationOption>(LOCATIONS[0]);
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('time2coin_location');
+    if (saved) {
+      const match = LOCATIONS.find(l => l.id === saved);
+      if (match) setSelected(match);
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSelect = (loc: LocationOption) => {
+    setSelected(loc);
+    setIsOpen(false);
+    localStorage.setItem('time2coin_location', loc.id);
+  };
+
+  return (
+    <div className={`relative inline-block text-left ${className}`} ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-700/80 rounded-xl text-xs font-semibold transition shadow-sm hover:border-cyan-500/50 shrink-0"
+        title="Select Community Location / District"
+      >
+        <MapPin className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+        <span className="font-bold text-slate-100 text-[11px] sm:text-xs">
+          <span className="sm:hidden">{selected.shortCode}</span>
+          <span className="hidden sm:inline">{selected.name}</span>
+        </span>
+        <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute right-0 sm:left-0 sm:right-auto mt-2 w-56 bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl z-50 overflow-hidden divide-y divide-slate-800">
+          <div className="p-2.5 bg-slate-950/50">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-cyan-400">Community Location</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">Filter local physical services in your area</p>
+          </div>
+
+          <div className="p-1 space-y-0.5">
+            {LOCATIONS.map((loc) => {
+              const isSelected = loc.id === selected.id;
+              return (
+                <button
+                  key={loc.id}
+                  onClick={() => handleSelect(loc)}
+                  className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center justify-between transition ${
+                    isSelected
+                      ? 'bg-cyan-950/60 text-cyan-200 border border-cyan-800/50 font-bold'
+                      : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span>{loc.flag}</span>
+                    <span>{loc.name}</span>
+                  </div>
+                  {isSelected && <Check className="w-3.5 h-3.5 text-cyan-400" />}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="p-2 bg-slate-950/70 text-center">
+            <span className="text-[10px] text-slate-400">⚡ 100% Cash-Free Local Skill Exchange</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function Time2CoinMainApp() {
@@ -445,7 +545,7 @@ export default function Time2CoinMainApp() {
 
           {/* DESKTOP TOP NAV LINKS */}
           <div className="hidden lg:flex items-center gap-2 shrink-0">
-            <CountrySelector userJurisdictionId={currentUser?.jurisdiction_id} />
+            <LocationSelector />
             <a href="/" className="px-3 py-1.5 text-cyan-300 font-semibold text-xs bg-cyan-950/80 border border-cyan-800/80 rounded-lg">
               Home
             </a>
@@ -513,7 +613,7 @@ export default function Time2CoinMainApp() {
 
           {/* MOBILE HEADER CONTROLS (IPHONE) */}
           <div className="flex lg:hidden items-center gap-2">
-            <CountrySelector userJurisdictionId={currentUser?.jurisdiction_id} />
+            <LocationSelector />
             {currentUser && (
               <div className="bg-cyan-950/80 border border-cyan-800/80 rounded-full px-2.5 py-1 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
