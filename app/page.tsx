@@ -1429,14 +1429,14 @@ export default function Time2CoinMainApp() {
         <div className="flex items-stretch justify-around px-2 pt-1.5 pb-2">
           {/* HOME */}
           <button
-            onClick={() => setActiveTab('dashboard')}
-            className={`flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl transition-all flex-1 ${
-              activeTab === 'dashboard' ? 'text-cyan-400 font-bold' : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Clock className={`w-5 h-5 ${activeTab === 'dashboard' ? 'scale-110 text-cyan-400' : ''} transition-transform`} />
-            <span className="text-[10px] tracking-tight">Home</span>
-          </button>
+      onClick={() => { setActiveTab('dashboard'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} // <-- Line 1332
+      className={`flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl transition-all flex-1 ${
+        activeTab === 'dashboard' ? 'text-cyan-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+      }`}
+    >
+      <Clock className={`w-5 h-5 ${activeTab === 'dashboard' ? 'scale-110 text-cyan-400' : ''} transition-transform`} />
+      <span className="text-[10px] tracking-tight">Home</span>
+    </button>
 
           {/* BROWSE DIRECTORY */}
           <a
@@ -1469,12 +1469,18 @@ export default function Time2CoinMainApp() {
 
           {/* PARTNERS MENU TOGGLE */}
           <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-amber-400 hover:text-amber-300 transition-all flex-1"
-          >
-            <Building2 className="w-5 h-5" />
-            <span className="text-[10px] font-bold tracking-tight">Partners</span>
-          </button>
+  onClick={() => {
+    const nextState = !mobileMenuOpen;
+    setMobileMenuOpen(nextState);
+    if (nextState) {
+      window.scrollTo({ top: 0, behavior: 'smooth' }); // Smoothly scrolls view to top so the drawer is in view
+    }
+  }}
+  className="flex flex-col items-center justify-center gap-1 py-1 px-2 rounded-xl text-amber-400 hover:text-amber-300 transition-all flex-1"
+>
+  <Building2 className="w-5 h-5" />
+  <span className="text-[10px] font-bold tracking-tight">Partners</span>
+</button>
 
           {/* CONDITIONAL TAB: HOLDING / SIGN OUT (LOGGED IN) vs SIGN IN (LOGGED OUT) */}
           {currentUser ? (
